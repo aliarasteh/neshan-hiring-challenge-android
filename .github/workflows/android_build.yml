@@ -1,0 +1,75 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Change Wrapper Permissions
+        run: chmod +x ./gradlew
+
+      - name: Run Tests
+        run: ./gradlew testReleaseUnitTest
+
+      - name: Build Project
+        run: ./gradlew build
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      #      - name: Build Release AAB
+      #        run: ./gradlew bundleRelease
+
+      - name: Sign App APK
+        uses: r0adkll/sign-android-release@v1
+        # ID used to access action output
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          #          releaseDirectory: app/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.KEYSTORE }}
+          alias: ${{ secrets.TEST_SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.TEST_SIGNING_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.TEST_SIGNING_KEY_PASSWORD }}
+      #        env:
+      #          # override default build-tools version (29.0.3) -- optional
+      #          BUILD_TOOLS_VERSION: "30.0.2"
+
+      - name: Copy Signed APK To Files Directory
+        uses: canastro/copy-file-action@master
+        with:
+          source: "app/build/outputs/apk/release/app-release-unsigned-signed.apk"
+          target: "files/neshan-hiring-challenge.apk"
+
+      - name: Commit APK File
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add files/neshan-hiring-challenge.apk
+          git commit -m "save apk file" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+#      - name: Deploy to Play Store
+#          uses: r0adkll/upload-google-play@v1
+#          with:
+#            serviceAccountJsonPlainText: ${{secrets.SERVICE_ACCOUNT}}
+#            packageName: org.rajman.neshan.test
+#            releaseFiles: app/build/outputs/bundle/release/app-release.aab
+#            track: production

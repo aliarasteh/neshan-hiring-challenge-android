@@ -1,0 +1,92 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs.kotlin'
+}
+
+android {
+    signingConfigs {
+        release {
+//            storeFile = file(project.TEST_SIGNING_KEY_DIR)
+//            storePassword project.TEST_SIGNING_STORE_PASSWORD
+//            keyAlias = project.TEST_SIGNING_KEY_ALIAS
+//            keyPassword project.TEST_SIGNING_KEY_PASSWORD
+        }
+    }
+
+    compileSdkVersion project.compileSdkVersion.toInteger()
+    defaultConfig {
+        applicationId project.applicationId
+        minSdkVersion project.minSdkVersion.toInteger()
+        targetSdkVersion project.targetSdkVersion.toInteger()
+        versionCode project.versionCode.toInteger()
+        versionName project.versionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+//        signingConfig signingConfigs.release
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+        }
+    }
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    buildFeatures {
+        viewBinding true
+    }
+//    splits {
+//        abi {
+//            enable true
+//            reset()
+//            include 'armeabi-v7a'
+//            universalApk false
+//        }
+//    }
+}
+
+dependencies {
+    // Module dependencies
+    implementation(project(':core:component'))
+    implementation(project(':core:data'))
+    implementation implementation(project(':feature:choose_location',))
+
+    implementation "com.android.support:multidex:$multidexVersion"
+
+    // Test dependencies
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$testJunit"
+    androidTestImplementation "androidx.test.ext:junit-ktx:$testJunit"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$testEspresso"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:$testEspresso"
+//    androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
+//    debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
+    androidTestImplementation "androidx.navigation:navigation-testing:$navigationVersion"
+
+    // For instrumentation tests
+    androidTestImplementation  "com.google.dagger:hilt-android-testing:$hiltVersion"
+    kaptAndroidTest "com.google.dagger:hilt-compiler:$hiltVersion"
+    // For local unit tests
+    testImplementation "com.google.dagger:hilt-android-testing:$hiltVersion"
+    kaptTest "com.google.dagger:hilt-compiler:$hiltVersion"
+
+    // Hilt dependencies
+    implementation "com.google.dagger:hilt-android:$hiltVersion"
+    kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
+    kapt "androidx.hilt:hilt-compiler:$hiltCompilerVersion"
+}

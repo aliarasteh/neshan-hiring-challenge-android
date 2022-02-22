@@ -1,0 +1,5 @@
+include ':core:component'
+include ':core:data'
+include ':feature:choose_location'
+include ':app'
+rootProject.name = 'Neshan'

@@ -1,0 +1,12 @@
+<resources>
+    <string name="title_map" translatable="false">Map Fragment</string>
+    <string name="title_choose_location" translatable="false">Choose Location Fragment</string>
+
+
+    <string name="load_failed">Loading Failed</string>
+    <string name="loading">Loading</string>
+    <string name="retry">Retry</string>
+    <string name="empty_list_text">No Items Found!</string>
+    <string name="server_error">Network Error!</string>
+    <string name="server_error_text">Failure in loading data from server, check network access and try again</string>
+</resources>

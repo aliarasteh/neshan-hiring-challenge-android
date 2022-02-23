@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -23,16 +21,14 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    ActivityResultLauncher<Intent> startChooseLocationForResult = this.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-        @Override
-        public void onActivityResult(ActivityResult result) {
-            if (result.getResultCode() == RESULT_OK) {
-                Bundle extras = result.getData().getExtras();
-                double latitude = extras.getDouble(KEY_LATITUDE);
-                double longitude = extras.getDouble(KEY_LONGITUDE);
-                Log.e("Location", "latitude: " + latitude + " - longitude: " + longitude);
-                Toast.makeText(MainActivity.this, "latitude: " + latitude, Toast.LENGTH_SHORT).show();
-            }
+    ActivityResultLauncher<Intent> startChooseLocationForResult = this.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            Bundle extras = result.getData().getExtras();
+            double latitude = extras.getDouble(KEY_LATITUDE);
+            double longitude = extras.getDouble(KEY_LONGITUDE);
+            String locationText = "latitude: " + latitude + " - longitude: " + longitude;
+            Log.e("Location", locationText);
+            Toast.makeText(MainActivity.this, locationText, Toast.LENGTH_SHORT).show();
         }
     });
 

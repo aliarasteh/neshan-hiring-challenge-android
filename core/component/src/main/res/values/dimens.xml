@@ -7,8 +7,8 @@
     <dimen name="margin_15">15dp</dimen>
     <dimen name="margin_18">18dp</dimen>
     <dimen name="margin_20">20dp</dimen>
-    <dimen name="margin_40">40dp</dimen>
-    <dimen name="margin_50">50dp</dimen>
+    <dimen name="margin_25">25dp</dimen>
+    <dimen name="margin_30">30dp</dimen>
 
     <dimen name="text_size_9">9sp</dimen>
     <dimen name="text_size_11">11sp</dimen>
@@ -21,7 +21,8 @@
     <dimen name="radius_15">15dp</dimen>
 
     <dimen name="icon_size_25">25dp</dimen>
-    <dimen name="icon_size_35">30dp</dimen>
+    <dimen name="icon_size_35">35dp</dimen>
+    <dimen name="icon_size_40">40dp</dimen>
 
     <dimen name="button_height_35">35dp</dimen>
     <dimen name="button_height_45">45dp</dimen>

@@ -85,8 +85,9 @@ git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 
 here are third part libraries used in this sample
 
-1. **Balloon** - useful tool for showing tooltips and popups [GitHub](https://github.com/skydoves/Balloon)
-3. **Retrofit** - A type-safe HTTP client for Android and Java and great tool for networking [GitHub](https://github.com/square/retrofit)
+1. **Retrofit** - A type-safe HTTP client for Android and Java and great tool for networking - [GitHub](https://github.com/square/retrofit)
+2. **Neshan** - Neshan map and navigation tools - [WebSite](https://platform.neshan.org/)
+3. **Dexter**: an Android library that simplifies the process of requesting permissions at runtime - [GitHub](https://github.com/Karumi/Dexter)
 
 
 

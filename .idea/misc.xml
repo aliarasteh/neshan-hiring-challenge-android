@@ -5,6 +5,8 @@
       <map>
         <entry key="../../.gradle/caches/transforms-3/18dd48354cabf5b882dcb06fd4544eee/transformed/jetified-mobile-sdk-1.0.0/res/drawable/ic_logo.xml" value="0.189" />
         <entry key="../../.gradle/caches/transforms-3/18dd48354cabf5b882dcb06fd4544eee/transformed/jetified-mobile-sdk-1.0.0/res/drawable/ic_my_location.xml" value="0.189" />
+        <entry key="app/src/main/res/drawable/ic_app_logo.xml" value="0.189" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.189" />
         <entry key="core/component/src/main/res/drawable/bg_bottom_sheet.xml" value="0.189" />
         <entry key="core/component/src/main/res/drawable/bg_button_gray_light_normal.xml" value="0.189" />
         <entry key="core/component/src/main/res/drawable/bg_button_gray_light_tapped.xml" value="0.189" />

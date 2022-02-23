@@ -67,9 +67,6 @@ dependencies {
     api "com.google.dagger:hilt-android:$hiltVersion"
     kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
 
-    // tooltip (https://github.com/skydoves/Balloon)
-    implementation "com.github.skydoves:balloon:$skydovesBalloon"
-
     //Neshan sdk library
     api "neshan-android-sdk:mobile-sdk:$neshanMapVersion"
     api "neshan-android-sdk:services-sdk:$neshanMapVersion"
@@ -79,5 +76,6 @@ dependencies {
     api "com.google.android.gms:play-services-gcm:$playServiceGcmVersion"
     api "com.google.android.gms:play-services-location:$playServiceLocationVersion"
 
+    // todo remove usage
     api "com.karumi:dexter:$dexterVersion"
 }

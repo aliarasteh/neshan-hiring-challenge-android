@@ -5,11 +5,10 @@
     <string name="title_choose_location" translatable="false">Choose Location Fragment</string>
 
     <!-- Location Strings -->
-    <!--  TODO: translate these texts  -->
     <string name="main_activity_class_name" translatable="false">org.neshan.main.MainActivity</string>
-    <string name="no_location_text">No current location</string>
-    <string name="permission_rationale">Location permission needed for core functionality</string>
-    <string name="permission_denied_explanation">Permission was denied, but is needed for core functionality.</string>
-    <string name="settings">Settings</string>
-    <string name="ok">OK</string>
+    <string name="no_location_text">مکان یافت نشد</string>
+    <string name="permission_rationale">عملکرد صحیح برنامه نیازمند دسترسی به مکان یاب است</string>
+    <string name="permission_denied_explanation">جهت عملکرد بهتر برنامه دسترسی به مکان یاب نیاز است</string>
+    <string name="settings">تنظیمات</string>
+    <string name="ok">تایید</string>
 </resources>

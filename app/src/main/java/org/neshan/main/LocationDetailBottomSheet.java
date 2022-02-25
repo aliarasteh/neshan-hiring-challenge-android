@@ -15,15 +15,15 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import org.neshan.R;
-import org.neshan.common.model.LatLng;
 import org.neshan.data.model.enums.RoutingType;
+import org.neshan.data.model.response.Leg;
 import org.neshan.databinding.BottomsheetLocationDetailBinding;
 
 public class LocationDetailBottomSheet extends BottomSheetDialogFragment {
 
     private BottomsheetLocationDetailBinding mBinding;
 
-    private MainActivityViewModel mViewModel;
+    private MainActivityViewModel mSharedViewModel;
 
     // trigger action when bottom sheet closes
     private DialogInterface.OnDismissListener mOnDismissListener;
@@ -64,9 +64,10 @@ public class LocationDetailBottomSheet extends BottomSheetDialogFragment {
             });
         }
 
-        mViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
+        mSharedViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
+        observeViewModelChange(mSharedViewModel);
         // bind data to view
-        mBinding.setAddressDetail(mViewModel.getLocationAddressDetailLiveData().getValue());
+        mBinding.setViewModel(mSharedViewModel);
 
         setViewListeners();
 
@@ -80,12 +81,32 @@ public class LocationDetailBottomSheet extends BottomSheetDialogFragment {
 
         mBinding.route.setOnClickListener(view1 -> {
             if (getDialog() != null) {
-                // TODO: get start point from user location
-                mViewModel.setStartPoint(new LatLng(35.6900769, 51.364408));
-                mViewModel.loadDirection(RoutingType.CAR);
 //                getDialog().dismiss();
             }
         });
 
     }
+
+    private void observeViewModelChange(MainActivityViewModel viewModel) {
+
+        // load direction (here by default for car)
+        viewModel.loadDirection(RoutingType.CAR);
+
+        viewModel.getRoutingDetailLiveData().observe(getViewLifecycleOwner(), routingDetail -> {
+            if (routingDetail != null) {
+                mBinding.route.setClickable(true);
+                mBinding.route.setBackgroundResource(R.drawable.bg_radius_primary_25);
+                try {
+                    Leg leg = routingDetail.getRoutes().get(0).getLegs().get(0);
+                    mBinding.distance.setText(leg.getDistance().getText());
+                    mBinding.duration.setText(leg.getDuration().getText());
+                } catch (NullPointerException exception) {
+                    // failure in getting distance and duration
+                    exception.printStackTrace();
+                }
+            }
+        });
+
+    }
+
 }

@@ -42,7 +42,9 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     private final MutableLiveData<AddressDetailResponse> mLocationAddressDetail;
 
-    private MutableLiveData<ArrayList<LatLng>> mRoutePoints;
+    private final MutableLiveData<RoutingResponse> mRoutingDetail;
+
+    private final MutableLiveData<ArrayList<LatLng>> mRoutePoints;
 
     private LatLng mStartPoint = null;
     private LatLng mEndPoint = null;
@@ -55,6 +57,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         mCompositeDisposable = new CompositeDisposable();
         mGeneralError = new MutableLiveData<>();
         mLocationAddressDetail = new MutableLiveData<>();
+        mRoutingDetail = new MutableLiveData<>();
         mRoutePoints = new MutableLiveData<>();
 
     }
@@ -65,6 +68,10 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     public LiveData<AddressDetailResponse> getLocationAddressDetailLiveData() {
         return mLocationAddressDetail;
+    }
+
+    public LiveData<RoutingResponse> getRoutingDetailLiveData() {
+        return mRoutingDetail;
     }
 
     public LiveData<ArrayList<LatLng>> getRoutePoints() {
@@ -138,10 +145,13 @@ public class MainActivityViewModel extends AndroidViewModel {
                         @Override
                         public void onSuccess(RoutingResponse response) {
                             if (response.getRoutes() != null) {
+
+                                mRoutingDetail.postValue(response);
+
                                 try {
                                     Route route = response.getRoutes().get(0);
 
-                                    //                                    List<LatLng> routeOverviewPolylinePoints = PolylineEncoding.decode(
+//                                    List<LatLng> routeOverviewPolylinePoints = PolylineEncoding.decode(
 //                                            route.getOverviewPolyline().getEncodedPolyline()
 //                                    );
 //                                    mRoutePoints.postValue(new ArrayList<>(routeOverviewPolylinePoints));

@@ -4,6 +4,7 @@
     <color name="colorPrimary">#4ebe4a</color>
     <color name="colorPrimaryDark">#3B9C38</color>
     <color name="colorPrimaryDim25">#404ebe4a</color>
+    <color name="colorPrimaryDim50">#804EBE4A</color>
     <color name="colorPrimaryDim75">#BF4EBE4A</color>
     <color name="colorAccent">#F8ECE2</color>
     <color name="colorWhite">#FFFFFF</color>

@@ -3,13 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.2078125" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.14" />
         <entry key="app/src/main/res/layout/bottomsheet_location_detail.xml" value="0.25" />
         <entry key="core/component/src/main/res/drawable/bg_bottom_sheet.xml" value="0.155" />
         <entry key="core/component/src/main/res/drawable/bg_bottom_sheet_anchor.xml" value="0.155" />
         <entry key="core/component/src/main/res/drawable/bg_button_primary_normal.xml" value="0.1455" />
         <entry key="core/component/src/main/res/drawable/bg_radius_primary_15.xml" value="0.1785" />
         <entry key="core/component/src/main/res/drawable/bg_radius_primary_25.xml" value="0.1785" />
+        <entry key="core/component/src/main/res/drawable/bg_radius_primary_disabled_15.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/btn_gray_light.xml" value="0.1575" />
         <entry key="core/component/src/main/res/drawable/btn_primary.xml" value="0.1455" />
         <entry key="core/component/src/main/res/drawable/ic_circle_notification.xml" value="0.1575" />
         <entry key="core/component/src/main/res/drawable/ic_close.xml" value="0.1575" />

@@ -56,14 +56,28 @@ here are modules defined in the app structure, you can see more detail about eac
 
 ### <a name="setup">Setup And Run</a> 
 
-1. Clone the project from:  
+1. Clone the project:  
 
 ```sh
 git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 ```
 
-2. Get your license key from [**Neshan**](https://developers.neshan.org/panel/access-token/index) and place it in project
-3. Build and run project
+2. Define licence key and 
+
+   - get your **License key** from [**Neshan**](https://developers.neshan.org/panel/access-token/index) 
+   - place it in `neshan.license` file founded in directory:`src/main/res/raw/neshan.license`
+
+3. Define neshan Api key
+
+   - get your **API KEY** key from [**Neshan**](https://developers.neshan.org/panel/access-token/index)
+
+   - place your key in `gradle.properties` file (recommended: use global `gradle.properties`)
+
+```
+NESHAN_API_KEY="your api key for neshan services"
+```
+
+4. Build and run project
 
 
 
@@ -72,8 +86,8 @@ git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 - [x] implement base app structure and define architecture
 - [x] create common tools and helper classes
 - [ ] implement Neshan map navigation sample
-  - [ ] main map activity
-  - [ ] choose location activity
+  - [x] main map activity
+  - [x] choose location activity
   - [ ] find and show direction on map
   - [ ] navigate to destination
   - [ ] write test cases (not completed)
@@ -85,9 +99,9 @@ git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 
 here are third part libraries used in this sample
 
-1. **Retrofit** - A type-safe HTTP client for Android and Java and great tool for networking - [GitHub](https://github.com/square/retrofit)
-2. **Neshan** - Neshan map and navigation tools - [WebSite](https://platform.neshan.org/)
-3. **Dexter**: an Android library that simplifies the process of requesting permissions at runtime - [GitHub](https://github.com/Karumi/Dexter)
+1. **Neshan** - Neshan map and navigation tools - [WebSite](https://platform.neshan.org/)
+2. **Retrofit** - A type-safe HTTP client for Android and Java and great tool for networking - [GitHub](https://github.com/square/retrofit)
+3. **RxJava** - Enables reactive programming in Android. used for handling network requests in Java - [GitHub](https://github.com/ReactiveX/RxJava)
 
 
 

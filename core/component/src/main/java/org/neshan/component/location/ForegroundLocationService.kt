@@ -25,24 +25,40 @@ import java.util.concurrent.TimeUnit
  * versions. Please reference documentation for details.
  */
 class ForegroundLocationService : Service() {
+
+    companion object {
+        private const val TAG = "LocationService"
+        private const val PACKAGE_NAME = "org.neshan"
+        const val ACTION_FOREGROUND_LOCATION_BROADCAST =
+            "$PACKAGE_NAME.action.FOREGROUND_LOCATION_BROADCAST"
+        const val EXTRA_LOCATION = "$PACKAGE_NAME.extra.LOCATION"
+        private const val EXTRA_CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION =
+            "$PACKAGE_NAME.extra.CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION"
+
+        private const val NOTIFICATION_ID = 2001
+    }
+
     /*
      * Checks whether the bound activity has really gone away (foreground service with notification
      * created) or simply orientation change (no-op).
      */
-    private var configurationChange = false
+    private var mConfigurationChange = false
 
-    private var serviceRunningInForeground = false
+    private var mServiceRunningInForeground = false
 
-    private val localBinder = LocalBinder()
+    private val mLocalBinder = LocalBinder()
 
-    private lateinit var notificationManager: NotificationManager
+    private lateinit var mNotificationManager: NotificationManager
 
     // FusedLocationProviderClient - Main class for receiving location updates.
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
 
+    // LocationRequest - Requirements for the location updates, i.e., how often you should receive
+    // updates, the priority, etc.
+    private var mLocationRequest: LocationRequest? = null
 
     // LocationCallback - Called when FusedLocationProviderClient has a new Location.
-    private lateinit var locationCallback: LocationCallback
+    private lateinit var mLocationCallback: LocationCallback
 
     // Used only for local storage of the last known location. Usually, this would be saved to your
     // database, but because this is a simplified sample without a full database, we only need the
@@ -50,14 +66,15 @@ class ForegroundLocationService : Service() {
     private var currentLocation: Location? = null
 
     override fun onCreate() {
+
         Log.d(TAG, "onCreate()")
 
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Initialize the LocationCallback.
-        locationCallback = object : LocationCallback() {
+        mLocationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 // Normally, you want to save a new location to a database. We are simplifying
@@ -80,17 +97,19 @@ class ForegroundLocationService : Service() {
 
                 // Updates notification content if this service is running as a foreground
                 // service.
-                if (serviceRunningInForeground) {
-                    notificationManager.notify(
+                if (mServiceRunningInForeground) {
+                    mNotificationManager.notify(
                         NOTIFICATION_ID,
                         generateNotification(currentLocation)
                     )
                 }
             }
         }
+
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+
         Log.d(TAG, "onStartCommand()")
 
         val cancelLocationTrackingFromNotification =
@@ -102,46 +121,55 @@ class ForegroundLocationService : Service() {
         }
         // Tells the system not to recreate the service after it's been killed.
         return START_NOT_STICKY
+
     }
 
     override fun onBind(intent: Intent): IBinder {
+
         Log.d(TAG, "onBind()")
 
         // MainActivity (client) comes into foreground and binds to service, so the service can
         // become a background services.
         stopForeground(true)
-        serviceRunningInForeground = false
-        configurationChange = false
-        return localBinder
+        mServiceRunningInForeground = false
+        mConfigurationChange = false
+
+        return mLocalBinder
+
     }
 
     override fun onRebind(intent: Intent) {
+
         Log.d(TAG, "onRebind()")
 
         // MainActivity (client) returns to the foreground and rebinds to service, so the service
         // can become a background services.
         stopForeground(true)
-        serviceRunningInForeground = false
-        configurationChange = false
+        mServiceRunningInForeground = false
+        mConfigurationChange = false
+
         super.onRebind(intent)
+
     }
 
     override fun onUnbind(intent: Intent): Boolean {
+
         Log.d(TAG, "onUnbind()")
 
         // MainActivity (client) leaves foreground, so service needs to become a foreground service
         // to maintain the 'while-in-use' label.
         // NOTE: If this method is called due to a configuration change in MainActivity,
         // we do nothing.
-        if (!configurationChange && SharedPreferenceUtil.getLocationTrackingPref(this)) {
+        if (!mConfigurationChange && SharedPreferenceUtil.getLocationTrackingPref(this)) {
             Log.d(TAG, "Start foreground service")
             val notification = generateNotification(currentLocation)
             startForeground(NOTIFICATION_ID, notification)
-            serviceRunningInForeground = true
+            mServiceRunningInForeground = true
         }
 
         // Ensures onRebind() is called if MainActivity (client) rebinds.
         return true
+
     }
 
     override fun onDestroy() {
@@ -150,10 +178,74 @@ class ForegroundLocationService : Service() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        configurationChange = true
+
+        mConfigurationChange = true
+
+    }
+
+    fun setLocationRequest(request: LocationRequest) {
+        mLocationRequest = request
+    }
+
+    fun getLocationRequest(): LocationRequest? {
+        return mLocationRequest
+    }
+
+    fun subscribeToLocationUpdates() {
+
+        Log.d(TAG, "subscribeToLocationUpdates()")
+
+        SharedPreferenceUtil.saveLocationTrackingPref(this, true)
+
+        // Binding to this service doesn't actually trigger onStartCommand(). That is needed to
+        // ensure this Service can be promoted to a foreground service, i.e., the service needs to
+        // be officially started (which we do here).
+        startService(Intent(applicationContext, ForegroundLocationService::class.java))
+
+        try {
+            // use default location request if not already set
+            if (mLocationRequest == null) {
+                mLocationRequest = getDefaultLocationRequest()
+            }
+
+            // Subscribe to location changes.
+            mFusedLocationProviderClient.requestLocationUpdates(
+                mLocationRequest!!,
+                mLocationCallback,
+                Looper.getMainLooper()
+            )
+        } catch (unlikely: SecurityException) {
+            SharedPreferenceUtil.saveLocationTrackingPref(this, false)
+            Log.e(TAG, "Lost location permissions. Couldn't remove updates. $unlikely")
+        }
+
+    }
+
+    fun unsubscribeToLocationUpdates() {
+
+        Log.d(TAG, "unsubscribeToLocationUpdates()")
+
+        try {
+            // Unsubscribe to location changes.
+            val removeTask = mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback)
+            removeTask.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d(TAG, "Location Callback removed.")
+                    stopSelf()
+                } else {
+                    Log.d(TAG, "Failed to remove Location Callback.")
+                }
+            }
+            SharedPreferenceUtil.saveLocationTrackingPref(this, false)
+        } catch (unlikely: SecurityException) {
+            SharedPreferenceUtil.saveLocationTrackingPref(this, true)
+            Log.e(TAG, "Lost location permissions. Couldn't remove updates. $unlikely")
+        }
+
     }
 
     private fun getDefaultLocationRequest(): LocationRequest {
+
         return LocationRequest.create().apply {
             // Sets the desired interval for active location updates. This interval is inexact. You
             // may not receive updates at all if no location sources are available, or you may
@@ -176,56 +268,14 @@ class ForegroundLocationService : Service() {
 
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
-    }
 
-    fun subscribeToLocationUpdates(locationRequest: LocationRequest? = null) {
-        Log.d(TAG, "subscribeToLocationUpdates()")
-
-        SharedPreferenceUtil.saveLocationTrackingPref(this, true)
-
-        // Binding to this service doesn't actually trigger onStartCommand(). That is needed to
-        // ensure this Service can be promoted to a foreground service, i.e., the service needs to
-        // be officially started (which we do here).
-        startService(Intent(applicationContext, ForegroundLocationService::class.java))
-
-        try {
-            // Subscribe to location changes.
-            fusedLocationProviderClient.requestLocationUpdates(
-                locationRequest ?: getDefaultLocationRequest(),
-                locationCallback,
-                Looper.getMainLooper()
-            )
-        } catch (unlikely: SecurityException) {
-            SharedPreferenceUtil.saveLocationTrackingPref(this, false)
-            Log.e(TAG, "Lost location permissions. Couldn't remove updates. $unlikely")
-        }
-    }
-
-    fun unsubscribeToLocationUpdates() {
-        Log.d(TAG, "unsubscribeToLocationUpdates()")
-
-        try {
-            // Unsubscribe to location changes.
-            val removeTask = fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-            removeTask.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d(TAG, "Location Callback removed.")
-                    stopSelf()
-                } else {
-                    Log.d(TAG, "Failed to remove Location Callback.")
-                }
-            }
-            SharedPreferenceUtil.saveLocationTrackingPref(this, false)
-        } catch (unlikely: SecurityException) {
-            SharedPreferenceUtil.saveLocationTrackingPref(this, true)
-            Log.e(TAG, "Lost location permissions. Couldn't remove updates. $unlikely")
-        }
     }
 
     /*
      * Generates a BIG_TEXT_STYLE Notification that represent latest location.
      */
     private fun generateNotification(location: Location?): Notification {
+
         Log.d(TAG, "generateNotification()")
 
         // Main steps for building a BIG_TEXT_STYLE notification:
@@ -251,7 +301,7 @@ class ForegroundLocationService : Service() {
             // Adds NotificationChannel to system. Attempting to create an
             // existing notification channel with its original values performs
             // no operation, so it's safe to perform the below sequence.
-            notificationManager.createNotificationChannel(notificationChannel)
+            mNotificationManager.createNotificationChannel(notificationChannel)
         }
 
         // 2. Build the BIG_TEXT_STYLE.
@@ -300,6 +350,7 @@ class ForegroundLocationService : Service() {
                 servicePendingIntent
             )
             .build()
+
     }
 
     /**
@@ -311,15 +362,4 @@ class ForegroundLocationService : Service() {
             get() = this@ForegroundLocationService
     }
 
-    companion object {
-        private const val TAG = "LocationService"
-        private const val PACKAGE_NAME = "org.neshan"
-        const val ACTION_FOREGROUND_LOCATION_BROADCAST =
-            "$PACKAGE_NAME.action.FOREGROUND_LOCATION_BROADCAST"
-        const val EXTRA_LOCATION = "$PACKAGE_NAME.extra.LOCATION"
-        private const val EXTRA_CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION =
-            "$PACKAGE_NAME.extra.CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION"
-
-        private const val NOTIFICATION_ID = 2001
-    }
 }

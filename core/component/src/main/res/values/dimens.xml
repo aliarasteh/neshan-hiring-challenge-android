@@ -2,32 +2,22 @@
 <resources>
     <dimen name="horizontal_padding">24dp</dimen>
 
-    <dimen name="margin_5">5dp</dimen>
     <dimen name="margin_10">10dp</dimen>
     <dimen name="margin_15">15dp</dimen>
-    <dimen name="margin_18">18dp</dimen>
     <dimen name="margin_20">20dp</dimen>
-    <dimen name="margin_25">25dp</dimen>
     <dimen name="margin_30">30dp</dimen>
 
-    <dimen name="text_size_9">9sp</dimen>
-    <dimen name="text_size_11">11sp</dimen>
     <dimen name="text_size_12">12sp</dimen>
     <dimen name="text_size_14">14sp</dimen>
-    <dimen name="text_size_23">23sp</dimen>
 
-    <dimen name="radius_7">7dp</dimen>
-    <dimen name="radius_12">12dp</dimen>
     <dimen name="radius_15">15dp</dimen>
+    <dimen name="radius_25">25dp</dimen>
 
-    <dimen name="icon_size_25">25dp</dimen>
-    <dimen name="icon_size_35">35dp</dimen>
     <dimen name="icon_size_40">40dp</dimen>
 
-    <dimen name="button_height_35">35dp</dimen>
+    <dimen name="button_height_40">40dp</dimen>
     <dimen name="button_height_45">45dp</dimen>
-    <dimen name="button_height_55">55dp</dimen>
 
-    <dimen name="button_width_120">120dp</dimen>
-
+    <dimen name="bottom_sheet_anchor_width">60dp</dimen>
+    <dimen name="bottom_sheet_anchor_height">4dp</dimen>
 </resources>

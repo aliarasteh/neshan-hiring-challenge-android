@@ -1,9 +1,10 @@
 package org.neshan.data.network
 
-import org.neshan.data.model.response.CommunityResponse
-import retrofit2.Response
+import io.reactivex.rxjava3.core.Single
+import org.neshan.data.model.response.AddressDetailResponse
 import retrofit2.http.GET
-import retrofit2.http.Path
+import retrofit2.http.Headers
+import retrofit2.http.Query
 
 /**
  * The API interface for all required server apis
@@ -11,11 +12,14 @@ import retrofit2.http.Path
 interface ApiClient {
 
     /**
-     * loads community items by page.
-     * There are 20 community members per page.The last page has less than 20 members
-     * @param page: requested page index
+     * loads address detail for specific location by latitude and longitude
+     * @param lat: latitude for desired location
+     * @param lng: longitude for desired location
      */
-    @GET("community_{page}.json")
-    suspend fun getCommunityList(@Path("page") page: Int): Response<CommunityResponse>
+    @GET("v4/reverse")
+    fun getAddress(
+        @Query("lat") lat: Double,
+        @Query("lng") lng: Double
+    ): Single<AddressDetailResponse>
 
 }

@@ -11,8 +11,15 @@
         <entry key="core/component/src/main/res/drawable/bg_radius_primary_15.xml" value="0.1785" />
         <entry key="core/component/src/main/res/drawable/bg_radius_primary_25.xml" value="0.1785" />
         <entry key="core/component/src/main/res/drawable/btn_primary.xml" value="0.1455" />
+        <entry key="core/component/src/main/res/drawable/ic_circle_notification.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ic_close.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ic_error_circle.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ic_warning.xml" value="0.1575" />
         <entry key="core/component/src/main/res/drawable/ripple_primary_radius_15.xml" value="0.1455" />
+        <entry key="core/component/src/main/res/drawable/ripple_white_circular.xml" value="0.1575" />
         <entry key="core/component/src/main/res/drawable/ripple_white_radius_15.xml" value="0.1455" />
+        <entry key="core/component/src/main/res/layout/layout_snack_bar.xml" value="0.155859375" />
+        <entry key="core/component/src/main/res/layout/view_snack_bar.xml" value="0.155859375" />
         <entry key="feature/choose_location/src/main/res/drawable/ic_location_marker.xml" value="0.1785" />
         <entry key="feature/choose_location/src/main/res/layout/activity_choose_location.xml" value="0.14" />
       </map>

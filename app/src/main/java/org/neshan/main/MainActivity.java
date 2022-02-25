@@ -15,6 +15,9 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.carto.graphics.Bitmap;
+import com.carto.graphics.Color;
+import com.carto.styles.LineStyle;
+import com.carto.styles.LineStyleBuilder;
 import com.carto.styles.MarkerStyleBuilder;
 import com.carto.utils.BitmapUtils;
 
@@ -22,8 +25,12 @@ import org.neshan.R;
 import org.neshan.choose_location.ChooseLocationActivity;
 import org.neshan.common.model.LatLng;
 import org.neshan.component.util.FunctionExtensionKt;
+import org.neshan.data.util.EventObserver;
 import org.neshan.databinding.ActivityMainBinding;
 import org.neshan.mapsdk.model.Marker;
+import org.neshan.mapsdk.model.Polyline;
+
+import java.util.ArrayList;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -36,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
 
     // a marker for selected location to be shown on map
     private Marker mDestinationMarker;
+
+    // poly line for the path from start point to end point on map
+    private Polyline mRoutingPathPolyLine;
 
     private final ActivityResultLauncher<Intent> mStartChooseLocationForResult = this.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
 
@@ -78,11 +88,24 @@ public class MainActivity extends AppCompatActivity {
                     // if user closed address detail then remove location marker from map
                     if (mDestinationMarker != null) {
                         mBinding.mapview.removeMarker(mDestinationMarker);
+                        mViewModel.setEndPoint(null);
+                    }
+                    // if user closed address detail then remove drawn path from map
+                    if (mRoutingPathPolyLine != null) {
+                        mBinding.mapview.removePolyline(mRoutingPathPolyLine);
                     }
                 });
             }
         });
 
+        viewModel.getRoutePoints().observe(this, routePoints -> {
+            showPathOnMap(routePoints);
+        });
+
+        viewModel.getGeneralErrorLiveData().observe(this, new EventObserver<>(error -> {
+            FunctionExtensionKt.showError(mBinding.getRoot(), error);
+            return null;
+        }));
 
     }
 
@@ -117,9 +140,9 @@ public class MainActivity extends AppCompatActivity {
         mBinding.mapview.setZoom(15f, 0.25f);
         mBinding.mapview.addMarker(mDestinationMarker);
 
-
         // load address detail for selected location
         mViewModel.loadAddressForLocation(latLng);
+        mViewModel.setEndPoint(latLng);
 
     }
 
@@ -137,6 +160,34 @@ public class MainActivity extends AppCompatActivity {
 
         return new Marker(latLng, markStCr.buildStyle());
 
+    }
+
+    private void showPathOnMap(ArrayList<LatLng> routePoints) {
+
+        if (mRoutingPathPolyLine != null) {
+            mBinding.mapview.removePolyline(mRoutingPathPolyLine);
+        }
+        mRoutingPathPolyLine = new Polyline(routePoints, getLineStyle());
+        mBinding.mapview.addPolyline(mRoutingPathPolyLine);
+
+        LatLng startPoint = mViewModel.getStartPoint();
+        LatLng endPoint = mViewModel.getStartPoint();
+
+        // set map camera zoom to have a better view of path
+        double centerFocalPositionX = (startPoint.getLatitude() + endPoint.getLatitude()) / 2;
+        double centerFocalPositionY = (startPoint.getLongitude() + endPoint.getLongitude()) / 2;
+        mBinding.mapview.moveCamera(new LatLng(centerFocalPositionX, centerFocalPositionY), 0.5f);
+        mBinding.mapview.setZoom(15, 0.5f);
+
+    }
+
+    private LineStyle getLineStyle() {
+        LineStyleBuilder lineStCr = new LineStyleBuilder();
+        Color color = new Color(ContextCompat.getColor(this, R.color.colorPrimaryDim75));
+        lineStCr.setColor(color);
+        lineStCr.setWidth(10f);
+        lineStCr.setStretchFactor(0f);
+        return lineStCr.buildStyle();
     }
 
 }

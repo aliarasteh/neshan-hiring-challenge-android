@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import org.neshan.R;
+import org.neshan.common.model.LatLng;
+import org.neshan.data.model.enums.RoutingType;
 import org.neshan.databinding.BottomsheetLocationDetailBinding;
 
 public class LocationDetailBottomSheet extends BottomSheetDialogFragment {
@@ -78,7 +80,10 @@ public class LocationDetailBottomSheet extends BottomSheetDialogFragment {
 
         mBinding.route.setOnClickListener(view1 -> {
             if (getDialog() != null) {
-                getDialog().dismiss();
+                // TODO: get start point from user location
+                mViewModel.setStartPoint(new LatLng(35.6900769, 51.364408));
+                mViewModel.loadDirection(RoutingType.CAR);
+//                getDialog().dismiss();
             }
         });
 

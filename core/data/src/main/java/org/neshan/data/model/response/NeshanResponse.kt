@@ -1,7 +1,7 @@
 package org.neshan.data.model.response
 
 abstract class NeshanResponse {
-    private val status: String = ""
+    val status: String = ""
     val code: Int? = null
     val message: String? = null
 

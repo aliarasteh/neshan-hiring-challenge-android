@@ -1,14 +1,27 @@
 package org.neshan.main;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import org.neshan.R;
 import org.neshan.common.model.LatLng;
+import org.neshan.common.utils.PolylineEncoding;
+import org.neshan.data.model.enums.RoutingType;
+import org.neshan.data.model.error.GeneralError;
+import org.neshan.data.model.error.SimpleError;
 import org.neshan.data.model.response.AddressDetailResponse;
+import org.neshan.data.model.response.Route;
+import org.neshan.data.model.response.RoutingResponse;
+import org.neshan.data.model.response.Step;
+import org.neshan.data.util.Event;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -25,7 +38,14 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     private final CompositeDisposable mCompositeDisposable;
 
+    private final MutableLiveData<Event<GeneralError>> mGeneralError;
+
     private final MutableLiveData<AddressDetailResponse> mLocationAddressDetail;
+
+    private MutableLiveData<ArrayList<LatLng>> mRoutePoints;
+
+    private LatLng mStartPoint = null;
+    private LatLng mEndPoint = null;
 
     @Inject
     public MainActivityViewModel(@NonNull Application application, MainActivityModel model) {
@@ -33,15 +53,43 @@ public class MainActivityViewModel extends AndroidViewModel {
 
         mModel = model;
         mCompositeDisposable = new CompositeDisposable();
+        mGeneralError = new MutableLiveData<>();
         mLocationAddressDetail = new MutableLiveData<>();
+        mRoutePoints = new MutableLiveData<>();
 
+    }
+
+    public LiveData<Event<GeneralError>> getGeneralErrorLiveData() {
+        return mGeneralError;
     }
 
     public LiveData<AddressDetailResponse> getLocationAddressDetailLiveData() {
         return mLocationAddressDetail;
     }
 
-    // try to load address detail from server
+    public LiveData<ArrayList<LatLng>> getRoutePoints() {
+        return mRoutePoints;
+    }
+
+    public LatLng getStartPoint() {
+        return mStartPoint;
+    }
+
+    public void setStartPoint(LatLng latLng) {
+        mStartPoint = latLng;
+    }
+
+    public LatLng getEndPoint() {
+        return mEndPoint;
+    }
+
+    public void setEndPoint(LatLng latLng) {
+        mEndPoint = latLng;
+    }
+
+    /**
+     * try to load address detail from server
+     */
     public void loadAddressForLocation(LatLng latLng) {
         mModel.getAddress(latLng.getLatitude(), latLng.getLongitude())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -66,6 +114,59 @@ public class MainActivityViewModel extends AndroidViewModel {
                         e.printStackTrace();
                     }
                 });
+    }
+
+    /**
+     * try to load direction detail from server
+     */
+    public void loadDirection(RoutingType routingType) {
+        if (mStartPoint == null) {
+            SimpleError error = new SimpleError(getApplication().getString(R.string.start_point_not_selected));
+            mGeneralError.postValue(new Event<>(error));
+        } else if (mEndPoint == null) {
+            SimpleError error = new SimpleError(getApplication().getString(R.string.end_point_not_selected));
+            mGeneralError.postValue(new Event<>(error));
+        } else {
+            mModel.getDirection(routingType, mStartPoint, mEndPoint, 0)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new SingleObserver<>() {
+                        @Override
+                        public void onSubscribe(Disposable disposable) {
+                            mCompositeDisposable.add(disposable);
+                        }
+
+                        @Override
+                        public void onSuccess(RoutingResponse response) {
+                            if (response.getRoutes() != null) {
+                                try {
+                                    Route route = response.getRoutes().get(0);
+
+                                    //                                    List<LatLng> routeOverviewPolylinePoints = PolylineEncoding.decode(
+//                                            route.getOverviewPolyline().getEncodedPolyline()
+//                                    );
+//                                    mRoutePoints.postValue(new ArrayList<>(routeOverviewPolylinePoints));
+
+                                    ArrayList<LatLng> decodedStepByStepPath = new ArrayList<>();
+                                    for (Step step : route.getLegs().get(0).getSteps()) {
+                                        decodedStepByStepPath.addAll(PolylineEncoding.decode(step.getEncodedPolyline()));
+                                    }
+
+                                    mRoutePoints.postValue(decodedStepByStepPath);
+                                } catch (NullPointerException exception) {
+                                    SimpleError error = new SimpleError(getApplication().getString(R.string.routing_failure));
+                                    mGeneralError.postValue(new Event<>(error));
+                                    exception.printStackTrace();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            // TODO: show error to user
+                            e.printStackTrace();
+                        }
+                    });
+        }
     }
 
     @Override

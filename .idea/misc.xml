@@ -3,28 +3,31 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="../../.gradle/caches/transforms-3/18dd48354cabf5b882dcb06fd4544eee/transformed/jetified-mobile-sdk-1.0.0/res/drawable/ic_logo.xml" value="0.189" />
-        <entry key="../../.gradle/caches/transforms-3/18dd48354cabf5b882dcb06fd4544eee/transformed/jetified-mobile-sdk-1.0.0/res/drawable/ic_my_location.xml" value="0.189" />
-        <entry key="app/src/main/res/drawable/ic_app_logo.xml" value="0.189" />
-        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/bg_bottom_sheet.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/bg_button_gray_light_normal.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/bg_button_gray_light_tapped.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/bg_button_gray_normal.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/bg_button_primary_normal.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/bg_button_primary_tapped.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/bg_radius_white.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/btn_gray_light.xml" value="0.189" />
-        <entry key="core/component/src/main/res/drawable/btn_primary.xml" value="0.1" />
-        <entry key="core/component/src/main/res/drawable/ic_back.xml" value="0.189" />
-        <entry key="feature/choose_location/src/main/res/drawable/ic_location.xml" value="0.189" />
-        <entry key="feature/choose_location/src/main/res/drawable/ic_location_icon_svg_28.xml" value="0.189" />
-        <entry key="feature/choose_location/src/main/res/drawable/ic_location_marker.xml" value="0.189" />
-        <entry key="feature/choose_location/src/main/res/layout/activity_choose_location.xml" value="0.3055555555555556" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.14" />
+        <entry key="app/src/main/res/layout/bottomsheet_location_detail.xml" value="0.25" />
+        <entry key="core/component/src/main/res/drawable/bg_bottom_sheet.xml" value="0.155" />
+        <entry key="core/component/src/main/res/drawable/bg_bottom_sheet_anchor.xml" value="0.155" />
+        <entry key="core/component/src/main/res/drawable/bg_button_primary_normal.xml" value="0.1455" />
+        <entry key="core/component/src/main/res/drawable/bg_radius_primary_15.xml" value="0.1785" />
+        <entry key="core/component/src/main/res/drawable/bg_radius_primary_25.xml" value="0.1785" />
+        <entry key="core/component/src/main/res/drawable/bg_radius_primary_disabled_15.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/btn_gray_light.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/btn_primary.xml" value="0.1455" />
+        <entry key="core/component/src/main/res/drawable/ic_circle_notification.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ic_close.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ic_error_circle.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ic_warning.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ripple_primary_radius_15.xml" value="0.1455" />
+        <entry key="core/component/src/main/res/drawable/ripple_white_circular.xml" value="0.1575" />
+        <entry key="core/component/src/main/res/drawable/ripple_white_radius_15.xml" value="0.1455" />
+        <entry key="core/component/src/main/res/layout/layout_snack_bar.xml" value="0.155859375" />
+        <entry key="core/component/src/main/res/layout/view_snack_bar.xml" value="0.155859375" />
+        <entry key="feature/choose_location/src/main/res/drawable/ic_location_marker.xml" value="0.1785" />
+        <entry key="feature/choose_location/src/main/res/layout/activity_choose_location.xml" value="0.14" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

@@ -2,6 +2,7 @@ package org.neshan.data.network
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -16,10 +17,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-/**
- * Created by Ali Arasteh
- */
 
 @Singleton
 open class RetrofitConfig @Inject constructor() {
@@ -52,6 +49,7 @@ open class RetrofitConfig @Inject constructor() {
     open fun getRetrofitBuilder(): Retrofit.Builder {
         return Retrofit.Builder()
             .baseUrl(getBaseUrl())
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .addConverterFactory(getConverterFactory())
             .client(httpClient.build())
     }
@@ -119,7 +117,12 @@ open class RetrofitConfig @Inject constructor() {
      * override this method and initialize your headers if necessary
      * */
     open fun getHeaders(): List<Pair<String, String>>? {
-        return null
+
+        val headers = mutableListOf<Pair<String, String>>()
+        headers.add(Pair("Api-Key", BuildConfig.NESHAN_API_KEY))
+
+        return headers
+
     }
 
     /**

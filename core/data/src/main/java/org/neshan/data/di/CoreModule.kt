@@ -19,14 +19,18 @@ object CoreModule {
     @Provides
     @Singleton
     fun provideGson(): Gson {
+
         return Gson()
+
     }
 
     @Provides
     @Singleton
     fun provideApiClient(retrofitConfig: RetrofitConfig): ApiClient {
         retrofitConfig.initialize()
+
         return retrofitConfig.createService(ApiClient::class.java)
+
     }
 
 }

@@ -14,7 +14,6 @@ android {
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        android.dataBinding.enabled true
     }
 
     buildTypes {
@@ -24,14 +23,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = '11'
-    }
-    buildFeatures {
-        viewBinding true
     }
 }
 
@@ -49,19 +45,12 @@ dependencies {
 
     // Kotlin
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
+//    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
+//    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
 
     // Lifecycle components
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
-
-    //dataBinding
-//    kapt "com.android.databinding:compiler:$dataBindingSupport"
-
-    // navigation component
-//    api "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-//    api "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
 
     // Hilt dependencies
     api "com.google.dagger:hilt-android:$hiltVersion"
@@ -75,7 +64,4 @@ dependencies {
     //Play Services
     api "com.google.android.gms:play-services-gcm:$playServiceGcmVersion"
     api "com.google.android.gms:play-services-location:$playServiceLocationVersion"
-
-    // todo remove usage
-    api "com.karumi:dexter:$dexterVersion"
 }

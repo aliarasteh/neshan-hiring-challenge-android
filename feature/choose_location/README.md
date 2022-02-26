@@ -5,7 +5,6 @@ This module is implemented for choosing location on map.
 ### Features
 
 - [x] choose location by scrolling map
-
 - [ ] search location by name
 - [ ] suggest common locations
 

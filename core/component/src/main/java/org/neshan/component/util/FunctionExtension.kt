@@ -4,13 +4,16 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.location.Location
 import android.view.View
+import org.neshan.common.model.LatLng
 import org.neshan.component.R
 import org.neshan.component.view.snackbar.SnackBar
 import org.neshan.component.view.snackbar.SnackBarType
 import org.neshan.data.model.error.GeneralError
 import org.neshan.data.model.error.NetworkError
 import org.neshan.data.model.error.SimpleError
+import kotlin.math.atan2
 
 fun Drawable.toBitmap(): Bitmap {
 
@@ -31,6 +34,9 @@ fun Drawable.toBitmap(): Bitmap {
 
 }
 
+/**
+ * show error as snack bar
+ * */
 fun showError(rootView: View, error: GeneralError) {
     when (error) {
         is NetworkError -> {
@@ -43,4 +49,42 @@ fun showError(rootView: View, error: GeneralError) {
             SnackBar.make(rootView, R.string.unknown_error, SnackBarType.ERROR).show()
         }
     }
+}
+
+/**
+ * calculates distance to target point
+ * */
+fun LatLng.distanceFrom(latLng: LatLng): FloatArray {
+
+    val distanceResult = FloatArray(3)
+
+    Location.distanceBetween(
+        this.latitude,
+        this.longitude,
+        latLng.latitude,
+        latLng.longitude,
+        distanceResult
+    )
+
+    return distanceResult;
+
+}
+
+/**
+ * calculate angle between two point (latlng) with north axis
+ * */
+fun angleWithNorthAxis(p1: LatLng, p2: LatLng): Double {
+
+    val longDiff = p2.longitude - p1.longitude
+
+    val a = atan2(
+        StrictMath.sin(longDiff) * StrictMath.cos(p2.latitude),
+        StrictMath.cos(p1.latitude) * StrictMath.sin(p2.latitude)
+                - StrictMath.sin(p1.latitude)
+                * StrictMath.cos(p2.latitude)
+                * StrictMath.cos(longDiff)
+    ) * 180 / StrictMath.PI
+
+    return (a + 360) % 360
+
 }

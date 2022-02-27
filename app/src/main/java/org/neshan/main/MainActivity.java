@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding mBinding;
 
-    private MainActivityViewModel mViewModel;
+    private MainViewModel mViewModel;
 
     // handle location updates
     private BoundLocationManager mLocationManager;
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
 
-        mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         // observe ViewModel live data objects changes
         observeViewModelChange(mViewModel);
 
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void observeViewModelChange(MainActivityViewModel viewModel) {
+    private void observeViewModelChange(MainViewModel viewModel) {
 
         viewModel.getLocationAddressDetailLiveData().observe(this, address -> {
             if (address != null) {
@@ -148,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
                     if (mRoutingPathPolyLine != null) {
                         mBinding.mapview.removePolyline(mRoutingPathPolyLine);
                     }
+
+                    focusOnLocation(mViewModel.getStartPoint());
                 });
             }
         });
@@ -275,6 +277,15 @@ public class MainActivity extends AppCompatActivity {
         lineStCr.setWidth(10f);
         lineStCr.setStretchFactor(0f);
         return lineStCr.buildStyle();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        mLocationManager.stopLocationUpdates();
+
+        super.onDestroy();
+
     }
 
 }

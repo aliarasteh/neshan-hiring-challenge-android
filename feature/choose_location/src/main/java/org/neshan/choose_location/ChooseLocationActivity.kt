@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import org.neshan.choose_location.databinding.ActivityChooseLocationBinding
 import org.neshan.common.model.LatLng
 import org.neshan.component.location.BoundLocationManager
+import org.neshan.component.location.BoundLocationManager.Companion.REQUEST_CODE_FOREGROUND_PERMISSIONS
 import org.neshan.component.location.LocationListener
 import org.neshan.component.util.toBitmap
 import org.neshan.mapsdk.model.Marker
@@ -25,8 +26,6 @@ class ChooseLocationActivity : AppCompatActivity(), LocationListener {
 
     companion object {
         private const val TAG = "ChooseLocationActivity"
-        private const val REQUEST_CODE_LOCATION_SETTING = 1001
-        private const val REQUEST_CODE_FOREGROUND_PERMISSIONS = 1002
 
         const val EXTRA_LATITUDE = "latitude"
         const val EXTRA_LONGITUDE = "longitude"

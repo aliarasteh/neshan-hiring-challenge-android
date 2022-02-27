@@ -83,7 +83,7 @@ class BoundLocationManager(
             mContext.unbindService(mForegroundServiceConnection)
         }
 
-        mForegroundLocationService?.unsubscribeToLocationUpdates()
+//        mForegroundLocationService?.unsubscribeToLocationUpdates()
 
     }
 
@@ -104,7 +104,11 @@ class BoundLocationManager(
 
     }
 
-    fun foregroundPermissionApproved(): Boolean {
+    fun stopLocationUpdates() {
+        mForegroundLocationService?.unsubscribeToLocationUpdates()
+    }
+
+    private fun foregroundPermissionApproved(): Boolean {
 
         return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
             mContext,

@@ -65,6 +65,7 @@ dependencies {
     implementation(project(':core:component'))
     implementation(project(':core:data'))
     implementation implementation(project(':feature:choose_location',))
+    implementation implementation(project(':feature:navigation',))
 
     implementation "com.android.support:multidex:$multidexVersion"
 

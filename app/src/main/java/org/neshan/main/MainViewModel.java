@@ -1,7 +1,6 @@
 package org.neshan.main;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -21,7 +20,6 @@ import org.neshan.data.model.response.Step;
 import org.neshan.data.util.Event;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,9 +30,9 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 @HiltViewModel
-public class MainActivityViewModel extends AndroidViewModel {
+public class MainViewModel extends AndroidViewModel {
 
-    private final MainActivityModel mModel;
+    private final MainModel mModel;
 
     private final CompositeDisposable mCompositeDisposable;
 
@@ -50,7 +48,7 @@ public class MainActivityViewModel extends AndroidViewModel {
     private LatLng mEndPoint = null;
 
     @Inject
-    public MainActivityViewModel(@NonNull Application application, MainActivityModel model) {
+    public MainViewModel(@NonNull Application application, MainModel model) {
         super(application);
 
         mModel = model;

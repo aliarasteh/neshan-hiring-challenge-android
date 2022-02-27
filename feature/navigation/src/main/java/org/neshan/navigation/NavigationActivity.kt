@@ -58,11 +58,6 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
     // poly line for showing progress path on map
     private var mProgressPathPolyLine: Polyline? = null
 
-    // animate marker from start point to end point
-    private var mMarkerAnimator: ValueAnimator? = null
-
-    // keeps first point of routing points to avoid repetitive path updates
-    private var mLastStartingPoint: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,6 +171,10 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
             updatePathOnMap(progressPoints)
         }
 
+        viewModel.markerPosition.observe(this) { markerPosition ->
+            updateLocationMarker(markerPosition)
+        }
+
     }
 
     /**
@@ -185,77 +184,26 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
         if (routePoints.size >= 2) {
 
-            val markerStartPoint = routePoints[0]
-            val markerEndPoint = routePoints[1]
-
-            // check if route is updated
-            if (mLastStartingPoint?.latitude != markerStartPoint.latitude
-                && mLastStartingPoint?.longitude != markerStartPoint.longitude
-            ) {
-                mLastStartingPoint = markerStartPoint
-
-                // create new poly line by routing points and update path on map
-                if (mProgressPathPolyLine != null) {
-                    mBinding.mapview.removePolyline(mProgressPathPolyLine)
-                }
-                mProgressPathPolyLine =
-                    Polyline(routePoints, getLineStyle(R.color.colorPrimaryDim75))
-                mBinding.mapview.addPolyline(mProgressPathPolyLine)
-
-                // calculate first route angle with north axis
-                // and set camera rotation to always show upward
-                val bearingEndPoint = routePoints.getOrNull(2) ?: markerEndPoint
-                val angle = angleWithNorthAxis(markerStartPoint, bearingEndPoint)
-                mBinding.mapview.setBearing((angle).toFloat(), 0.7f)
-
-                // start animating marker from first route point to second route point
-                animateMarker(markerStartPoint, markerEndPoint)
-
-                focusOnLocation(markerStartPoint)
+            // create new poly line by routing points and update path on map
+            if (mProgressPathPolyLine != null) {
+                mBinding.mapview.removePolyline(mProgressPathPolyLine)
             }
+            mProgressPathPolyLine =
+                Polyline(routePoints, getLineStyle(R.color.colorPrimaryDim75))
+            mBinding.mapview.addPolyline(mProgressPathPolyLine)
+
+            // calculate first route angle with north axis
+            // and set camera rotation to always show upward
+            val startPoint = routePoints[0]
+            val endPoint = routePoints[1]
+            val bearingEndPoint = routePoints.getOrNull(2) ?: endPoint
+            val angle = angleWithNorthAxis(startPoint, bearingEndPoint)
+            mBinding.mapview.setBearing((angle).toFloat(), 0.7f)
+
+            focusOnLocation(startPoint)
 
         }
 
-    }
-
-    /**
-     * creates a marker and animates it from start point to end point
-     * */
-    private fun animateMarker(start: LatLng, end: LatLng) {
-
-        if (mMarkerAnimator != null) {
-            mMarkerAnimator!!.cancel()
-        }
-
-        // animate marker from start point to end point in calculated duration (animationDuration)
-        val distance = start.distanceFrom(end).getOrNull(0) ?: 1f
-        val animationDuration = distance * mViewModel.getAverageSpeedRatio()
-        mMarkerAnimator = ValueAnimator.ofInt(0, 100)
-        mMarkerAnimator!!.duration = animationDuration.toLong()
-        mMarkerAnimator!!.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
-            var lastValue = 0
-            override fun onAnimationUpdate(animation: ValueAnimator) {
-                val percentageValue = (animation.animatedValue as Int)
-                if (percentageValue != lastValue) {
-                    lastValue = percentageValue
-                    val latitude =
-                        start.latitude + ((end.latitude - start.latitude) * percentageValue / 100)
-                    val longitude =
-                        start.longitude + ((end.longitude - start.longitude) * percentageValue / 100)
-
-                    if (mUserLocationMarker != null) {
-                        mBinding.mapview.removeMarker(mUserLocationMarker)
-                    }
-
-                    mUserLocationMarker = createMarker(LatLng(latitude, longitude))
-
-                    mBinding.mapview.addMarker(mUserLocationMarker)
-                }
-            }
-
-        })
-
-        mMarkerAnimator!!.start()
     }
 
     private fun getLineStyle(colorResource: Int): LineStyle? {
@@ -284,6 +232,18 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
         mLocationManager = BoundLocationManager(this, locationRequest, this)
         mLocationManager?.startLocationUpdates()
+
+    }
+
+    private fun updateLocationMarker(latLng: LatLng) {
+
+        if (mUserLocationMarker != null) {
+            mBinding.mapview.removeMarker(mUserLocationMarker)
+        }
+
+        mUserLocationMarker = createMarker(latLng)
+
+        mBinding.mapview.addMarker(mUserLocationMarker)
 
     }
 

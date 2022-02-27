@@ -179,12 +179,13 @@ public class MainViewModel extends AndroidViewModel {
 
     @Override
     protected void onCleared() {
-        super.onCleared();
 
         // disposes any incomplete request to avoid possible error also unnecessary network usage
         if (!mCompositeDisposable.isDisposed()) {
             mCompositeDisposable.dispose();
         }
+
+        super.onCleared();
 
     }
 

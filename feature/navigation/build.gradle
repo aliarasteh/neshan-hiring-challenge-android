@@ -12,6 +12,7 @@ android {
         minSdkVersion project.minSdkVersion.toInteger()
         targetSdkVersion project.targetSdkVersion.toInteger()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        android.dataBinding.enabled true
     }
 
     buildTypes {

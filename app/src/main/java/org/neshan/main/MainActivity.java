@@ -7,6 +7,7 @@ import static org.neshan.component.location.BoundLocationManager.REQUEST_CODE_FO
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -36,6 +37,7 @@ import org.neshan.choose_location.ChooseLocationActivity;
 import org.neshan.common.model.LatLng;
 import org.neshan.common.model.LatLngBounds;
 import org.neshan.component.location.BoundLocationManager;
+import org.neshan.component.location.LocationListener;
 import org.neshan.component.util.FunctionExtensionKt;
 import org.neshan.data.util.EventObserver;
 import org.neshan.databinding.ActivityMainBinding;
@@ -187,22 +189,35 @@ public class MainActivity extends AppCompatActivity {
         locationRequest.setMaxWaitTime(1);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        mLocationManager = new BoundLocationManager(this, locationRequest, location -> {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            onStartPointSelected(latLng);
+        mLocationManager = new BoundLocationManager(this, locationRequest, new LocationListener() {
+            @Override
+            public void onLastLocation(@NonNull Location location) {
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                onStartPointSelected(latLng, true);
+            }
+
+            @Override
+            public void onLocationChange(@NonNull Location location) {
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                onStartPointSelected(latLng, false);
+            }
         });
 
         mLocationManager.startLocationUpdates();
     }
 
     // does required actions when start location has been changed
-    private void onStartPointSelected(LatLng latLng) {
+    private void onStartPointSelected(LatLng latLng , boolean isCachedLocation) {
 
         // remove previously added marker from map and add new marker to user location
         if (mUserLocationMarker != null) {
             mBinding.mapview.removeMarker(mUserLocationMarker);
         }
-        mUserLocationMarker = createMarker(latLng, R.drawable.ic_marker);
+        if (isCachedLocation) {
+            mUserLocationMarker = createMarker(latLng, R.drawable.ic_marker_off);
+        } else {
+            mUserLocationMarker = createMarker(latLng, R.drawable.ic_marker);
+        }
         mBinding.mapview.addMarker(mUserLocationMarker);
 
         if (mViewModel.getStartPoint() == null) {
@@ -263,9 +278,11 @@ public class MainActivity extends AppCompatActivity {
 
         // setup map camera to show whole path
         LatLngBounds latLngBounds = new LatLngBounds(mViewModel.getStartPoint(), mViewModel.getEndPoint());
+        int mapWidth = Math.min(mBinding.mapview.getWidth(), mBinding.mapview.getHeight());
         ScreenBounds screenBounds = new ScreenBounds(
                 new ScreenPos(0, 0),
-                new ScreenPos(mBinding.mapview.getWidth(), mBinding.mapview.getHeight())
+//                new ScreenPos(mBinding.mapview.getWidth(), mBinding.mapview.getHeight())
+                new ScreenPos(mapWidth, mapWidth)
         );
         mBinding.mapview.moveToCameraBounds(latLngBounds, screenBounds, true, 0.25f);
     }

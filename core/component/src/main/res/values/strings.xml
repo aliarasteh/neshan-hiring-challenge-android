@@ -11,4 +11,11 @@
     <string name="permission_denied_explanation">جهت عملکرد بهتر برنامه دسترسی به مکان یاب نیاز است</string>
     <string name="settings">تنظیمات</string>
     <string name="ok">تایید</string>
+
+    <string name="distance">فاصله تا مقصد</string>
+    <string name="duration">زمان رسیدن</string>
+    <string name="stop">پایان</string>
+    <string name="exit">خروج</string>
+    <string name="notification_text">نقشه و مسیریاب نشان</string>
+
 </resources>

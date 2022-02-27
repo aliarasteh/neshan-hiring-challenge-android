@@ -2,6 +2,7 @@ package org.neshan.navigation
 
 import android.app.Application
 import android.location.Location
+import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -22,6 +23,10 @@ class NavigationViewModel @Inject constructor(
     application: Application,
     private val mModel: NavigationModel
 ) : AndroidViewModel(application) {
+
+    val duration = ObservableField<String>()
+
+    val distance = ObservableField<String>()
 
     private val mCompositeDisposable by lazy { CompositeDisposable() }
 
@@ -75,7 +80,7 @@ class NavigationViewModel @Inject constructor(
 
         // if loading direction -> avoid updating progress
         if (!mRoutingPoints.isNullOrEmpty() && !mLoadingDirection) {
-            calculateUserProgress(mRoutingPoints!!);
+            calculateUserProgress(mRoutingPoints!!)
         }
 
     }
@@ -105,13 +110,23 @@ class NavigationViewModel @Inject constructor(
 
                     override fun onSuccess(response: RoutingResponse) {
                         mLoadingDirection = false
-                        if (response.routes != null) {
-                            mRoutingPoints = ArrayList()
-                            response.routes?.firstOrNull()?.legs?.firstOrNull()?.steps?.map { step ->
-                                mRoutingPoints!!.addAll(PolylineEncoding.decode(step.encodedPolyline))
-                            }
-                            _progressPoints.postValue(mRoutingPoints!!)
 
+                        if (response.routes != null) {
+
+                            mRoutingPoints = ArrayList()
+
+                            response.routes?.firstOrNull()?.legs?.firstOrNull()?.let { leg ->
+
+                                leg.steps.map { step ->
+                                    mRoutingPoints!!.addAll(PolylineEncoding.decode(step.encodedPolyline))
+
+                                    _progressPoints.postValue(mRoutingPoints!!)
+                                }
+
+                                distance.set(leg.distance.text)
+                                duration.set(leg.duration.text)
+
+                            }
                         }
                     }
 

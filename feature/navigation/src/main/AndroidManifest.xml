@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.neshan.navigation" >
+    package="org.neshan.navigation">
 
     <application>
         <activity
             android:name=".NavigationActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="sensorPortrait" />
     </application>
 
 </manifest>

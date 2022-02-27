@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import org.neshan.R;
+import org.neshan.common.model.LatLng;
 import org.neshan.data.model.enums.RoutingType;
 import org.neshan.data.model.response.Leg;
 import org.neshan.databinding.BottomsheetLocationDetailBinding;
@@ -103,7 +104,7 @@ public class LocationDetailBottomSheet extends BottomSheetDialogFragment {
 
         viewModel.getRoutingDetailLiveData().observe(getViewLifecycleOwner(), routingDetail -> {
             if (routingDetail != null) {
-                mBinding.route.setClickable(true);
+                mBinding.route.setEnabled(true);
                 mBinding.route.setBackgroundResource(R.drawable.bg_radius_primary_25);
                 try {
                     Leg leg = routingDetail.getRoutes().get(0).getLegs().get(0);
@@ -122,17 +123,21 @@ public class LocationDetailBottomSheet extends BottomSheetDialogFragment {
 
         Intent intent = new Intent(requireActivity(), NavigationActivity.class);
 
-        org.neshan.data.model.LatLng startPoint = new org.neshan.data.model.LatLng(
-                mSharedViewModel.getStartPoint().getLatitude(),
-                mSharedViewModel.getStartPoint().getLongitude()
-        );
-        org.neshan.data.model.LatLng endPoint = new org.neshan.data.model.LatLng(
-                mSharedViewModel.getEndPoint().getLatitude(),
-                mSharedViewModel.getEndPoint().getLongitude()
-        );
-        intent.putExtra(EXTRA_START_POINT, startPoint);
-        intent.putExtra(EXTRA_END_POINT, endPoint);
-        startActivity(intent);
+        LatLng start = mSharedViewModel.getStartPoint();
+        LatLng end = mSharedViewModel.getEndPoint();
+        if (start != null && end != null) {
+            org.neshan.data.model.LatLng startPoint = new org.neshan.data.model.LatLng(
+                    start.getLatitude(),
+                    start.getLongitude()
+            );
+            org.neshan.data.model.LatLng endPoint = new org.neshan.data.model.LatLng(
+                    end.getLatitude(),
+                    end.getLongitude()
+            );
+            intent.putExtra(EXTRA_START_POINT, startPoint);
+            intent.putExtra(EXTRA_END_POINT, endPoint);
+            startActivity(intent);
+        }
 
     }
 

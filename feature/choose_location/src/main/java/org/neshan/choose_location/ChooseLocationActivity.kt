@@ -52,6 +52,10 @@ class ChooseLocationActivity : AppCompatActivity(), LocationListener {
         setUpLocationManager()
     }
 
+    override fun onLastLocation(location: Location) {
+        onLocationChange(location)
+    }
+
     // handle location change
     override fun onLocationChange(location: Location) {
 

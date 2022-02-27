@@ -71,8 +71,11 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
         setContentView(mBinding.root)
 
         mViewModel = ViewModelProvider(this)[NavigationViewModel::class.java]
+        mBinding.vm = mViewModel
 
         initMap()
+
+        setViewListeners()
 
         // observe ViewModel live data objects changes
         observeViewModelChange(mViewModel)
@@ -81,6 +84,10 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
         loadNavigationData()
 
+    }
+
+    override fun onLastLocation(location: Location) {
+        onLocationChange(location)
     }
 
     /**
@@ -136,6 +143,14 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
     private fun initMap() {
         // change camera angle
         mBinding.mapview.setTilt(40f, 0.25f)
+    }
+
+    private fun setViewListeners() {
+
+        mBinding.stop.setOnClickListener {
+            onBackPressed()
+        }
+
     }
 
     private fun loadNavigationData() {
@@ -232,8 +247,7 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
                         mBinding.mapview.removeMarker(mUserLocationMarker)
                     }
 
-                    mUserLocationMarker =
-                        createMarker(LatLng(latitude, longitude), R.drawable.ic_marker)
+                    mUserLocationMarker = createMarker(LatLng(latitude, longitude))
 
                     mBinding.mapview.addMarker(mUserLocationMarker)
                 }
@@ -273,13 +287,13 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
     }
 
-    private fun createMarker(latLng: LatLng, iconResource: Int): Marker {
+    private fun createMarker(latLng: LatLng): Marker {
 
         val markStCr = MarkerStyleBuilder()
 
         markStCr.size = 30f
 
-        val drawable = ContextCompat.getDrawable(this, iconResource)
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_marker)
         if (drawable != null) {
             val markerBitmap = BitmapUtils.createBitmapFromAndroidBitmap(drawable.toBitmap())
             markStCr.bitmap = markerBitmap

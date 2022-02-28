@@ -295,11 +295,11 @@ class ForegroundLocationService : Service() {
         cancelIntent.putExtra(EXTRA_CANCEL_LOCATION_TRACKING_FROM, true)
 
         val servicePendingIntent = PendingIntent.getService(
-            this, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            this, 0, cancelIntent, PendingIntent.FLAG_IMMUTABLE
         )
 
         val activityPendingIntent = PendingIntent.getActivity(
-            this, 0, launchActivityIntent, 0
+            this, 0, launchActivityIntent, PendingIntent.FLAG_IMMUTABLE
         )
 
         // build and issue the notification.

@@ -12,6 +12,7 @@
 
     <dimen name="text_size_12">12sp</dimen>
     <dimen name="text_size_14">14sp</dimen>
+    <dimen name="text_size_16">14sp</dimen>
 
     <dimen name="radius_15">15dp</dimen>
     <dimen name="radius_25">25dp</dimen>

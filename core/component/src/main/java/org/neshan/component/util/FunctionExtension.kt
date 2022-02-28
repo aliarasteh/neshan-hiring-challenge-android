@@ -70,8 +70,18 @@ fun LatLng.distanceFrom(latLng: LatLng): FloatArray {
 
 }
 
+
 /**
- * calculate angle between two point (latlng) with north axis
+ * checks points are the same
+ * */
+fun LatLng.equalsTo(latLng: LatLng): Boolean {
+
+    return (this.latitude == latLng.latitude && this.longitude == latLng.longitude)
+
+}
+
+/**
+ * calculate angle between two point (LatLng) with north axis
  * */
 fun angleWithNorthAxis(p1: LatLng, p2: LatLng): Double {
 

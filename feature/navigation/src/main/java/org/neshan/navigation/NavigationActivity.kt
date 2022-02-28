@@ -1,6 +1,5 @@
 package org.neshan.navigation
 
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -11,6 +10,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.carto.graphics.Color
 import com.carto.styles.LineStyle
 import com.carto.styles.LineStyleBuilder
@@ -19,14 +19,16 @@ import com.carto.utils.BitmapUtils
 import com.google.android.gms.location.LocationRequest
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.neshan.common.model.LatLng
 import org.neshan.component.location.BoundLocationManager
 import org.neshan.component.location.BoundLocationManager.Companion.REQUEST_CODE_FOREGROUND_PERMISSIONS
 import org.neshan.component.location.LocationListener
 import org.neshan.component.util.angleWithNorthAxis
-import org.neshan.component.util.distanceFrom
 import org.neshan.component.util.showError
 import org.neshan.component.util.toBitmap
+import org.neshan.component.view.snackbar.SnackBar
 import org.neshan.data.model.error.SimpleError
 import org.neshan.mapsdk.model.Marker
 import org.neshan.mapsdk.model.Polyline
@@ -173,6 +175,16 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
         viewModel.markerPosition.observe(this) { markerPosition ->
             updateLocationMarker(markerPosition)
+        }
+
+        viewModel.reachedDestination.observe(this) { reachedDestination ->
+            if (reachedDestination) {
+                SnackBar.make(mBinding.root, getString(R.string.reached_destination)).show()
+                lifecycleScope.launch {
+                    delay(3000)
+                    onBackPressed()
+                }
+            }
         }
 
     }

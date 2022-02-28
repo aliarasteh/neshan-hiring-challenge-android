@@ -15,15 +15,22 @@ import io.reactivex.rxjava3.disposables.Disposable
 import org.neshan.common.model.LatLng
 import org.neshan.common.utils.PolylineEncoding
 import org.neshan.component.util.distanceFrom
+import org.neshan.component.util.equalsTo
 import org.neshan.data.model.enums.RoutingType
 import org.neshan.data.model.response.RoutingResponse
 import javax.inject.Inject
+import kotlin.math.sqrt
 
 @HiltViewModel
 class NavigationViewModel @Inject constructor(
     application: Application,
     private val mModel: NavigationModel
 ) : AndroidViewModel(application) {
+
+    companion object {
+        private const val MAX_DISTANCE_TOLERANCE_IN_METERS = 50
+        private const val DEFAULT_AVERAGE_SPEED_FOR_CAR = 200f
+    }
 
     val duration = ObservableField<String>()
 
@@ -39,6 +46,9 @@ class NavigationViewModel @Inject constructor(
     private val _progressPoints = MutableLiveData<ArrayList<LatLng>>()
     val progressPoints: LiveData<ArrayList<LatLng>> by lazy { _progressPoints }
 
+    private val _reachedDestination = MutableLiveData<Boolean>()
+    val reachedDestination: LiveData<Boolean> by lazy { _reachedDestination }
+
     private val _markerPosition = MutableLiveData<LatLng>()
     val markerPosition: LiveData<LatLng> by lazy { _markerPosition }
 
@@ -46,7 +56,7 @@ class NavigationViewModel @Inject constructor(
 
     private var mUserLocation: Location? = null
 
-    private val mSpeedCalculator = SpeedCalculator(1000f)
+    private val mSpeedCalculator = SpeedCalculator(DEFAULT_AVERAGE_SPEED_FOR_CAR)
 
     private var mLoadingDirection = false
 
@@ -74,9 +84,7 @@ class NavigationViewModel @Inject constructor(
             mCompositeDisposable.dispose()
         }
 
-        if (mMarkerAnimator != null && mMarkerAnimator!!.isRunning) {
-            mMarkerAnimator!!.cancel()
-        }
+        cancelMarkerAnimation()
 
         super.onCleared()
 
@@ -97,10 +105,6 @@ class NavigationViewModel @Inject constructor(
             calculateUserProgress(mRoutingPoints!!)
         }
 
-    }
-
-    fun getAverageSpeedRatio(): Float {
-        return mSpeedCalculator.getAverageSpeedRatio()
     }
 
     /**
@@ -129,22 +133,27 @@ class NavigationViewModel @Inject constructor(
 
                             mRoutingPoints = ArrayList()
 
-                            response.routes?.firstOrNull()?.legs?.firstOrNull()?.let { leg ->
+                            try {
+                                response.routes?.firstOrNull()?.legs?.firstOrNull()?.let { leg ->
 
-                                leg.steps.map { step ->
-                                    mRoutingPoints!!.addAll(PolylineEncoding.decode(step.encodedPolyline))
+                                    leg.steps.map { step ->
+                                        mRoutingPoints!!.addAll(PolylineEncoding.decode(step.encodedPolyline))
 
-                                    if (mRoutingPoints!!.size >= 2) {
-                                        _progressPoints.postValue(mRoutingPoints!!)
+                                        if (mRoutingPoints!!.size >= 2) {
+                                            _progressPoints.postValue(mRoutingPoints!!)
 
-                                        _markerPosition.postValue(mRoutingPoints!!.first())
+                                            _markerPosition.postValue(mRoutingPoints!!.first())
+                                        }
+
                                     }
 
+                                    distance.set(leg.distance.text)
+                                    duration.set(leg.duration.text)
+
                                 }
-
-                                distance.set(leg.distance.text)
-                                duration.set(leg.duration.text)
-
+                            } catch (e: NullPointerException) {
+                                // failure in parsing routing detail
+                                e.printStackTrace()
                             }
                         }
                     }
@@ -164,57 +173,78 @@ class NavigationViewModel @Inject constructor(
      * */
     private fun calculateUserProgress(points: ArrayList<LatLng>) {
 
-        var index = mLastReachedPointIndex
+        val currentPoint = mRoutingPoints!!.getOrNull(mLastReachedPointIndex)
+        val nextPoint = mRoutingPoints!!.getOrNull(mLastReachedPointIndex + 1)
+        if (currentPoint != null && nextPoint != null && mUserLocation != null) {
+            val userPoint = LatLng(mUserLocation!!.latitude, mUserLocation!!.longitude)
 
-        // region try finding closest point to user location
+            val currentToNextDistance = currentPoint.distanceFrom(nextPoint)[0]
+            val currentToUserDistance = currentPoint.distanceFrom(userPoint)[0]
+            val nextToUserDistance = nextPoint.distanceFrom(userPoint)[0]
 
-        var point = points[index]
-        var distanceResult =
-            point.distanceFrom(LatLng(mUserLocation!!.latitude, mUserLocation!!.longitude))
-        var minDistance = distanceResult[0]
+            // check if user moved backward
+            val isUserMovedBackward = nextToUserDistance > currentToNextDistance
+                    && nextToUserDistance > currentToUserDistance
+                    && nextToUserDistance - currentToNextDistance > 1
 
-        // user is far from last point
-        if (minDistance > 70) {
-            index = 0
-        }
+            // check if user has gone far from route
+            var isUserFarFromRoute = false
+            try {
+                val s = (currentToNextDistance + currentToUserDistance + nextToUserDistance) / 2
 
-        while (index < points.size - 1) {
-            index++
-            point = points[index]
-            distanceResult =
-                point.distanceFrom(LatLng(mUserLocation!!.latitude, mUserLocation!!.longitude))
-            if (distanceResult[0] < minDistance) {
-                mLastReachedPointIndex = index
-                minDistance = distanceResult[0]
+                val area =
+                    sqrt(s * (s - currentToNextDistance) * (s - currentToUserDistance) * (s - nextToUserDistance))
+                val userToRouteDistance = 2 * area / currentToNextDistance
+
+                isUserFarFromRoute = userToRouteDistance > MAX_DISTANCE_TOLERANCE_IN_METERS
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        }
 
-        // endregion
+            // if user has gone far from route or moved backward -> request direction again
+            if (isUserFarFromRoute || isUserMovedBackward) {
+                mLastReachedPointIndex = 0
 
-        // if user has gone far from route -> request direction again
-        if (minDistance > 70) {
+                // cancel marker animation
+                cancelMarkerAnimation()
 
-            // try to recalculate path
-            val startPoint = LatLng(mUserLocation!!.latitude, mUserLocation!!.longitude)
-            loadDirection(startPoint, mEndPoint!!, RoutingType.CAR, mUserLocation!!.bearing.toInt())
+                // try to recalculate path
+                val startPoint = LatLng(mUserLocation!!.latitude, mUserLocation!!.longitude)
+                loadDirection(
+                    startPoint,
+                    mEndPoint!!,
+                    RoutingType.CAR,
+                    mUserLocation!!.bearing.toInt()
+                )
 
-        } else {
+            } else if (currentToUserDistance >= currentToNextDistance || (currentToNextDistance - currentToUserDistance) < 1) {
+                // user reached next point -> update progress
+                mLastReachedPointIndex++
 
-            // consider all points after closest point as remained routing points
-            val remainedPoints = mRoutingPoints!!.subList(mLastReachedPointIndex, points.size)
+                // get all points after closest point as remained routing points
+                val remainedPoints = mRoutingPoints!!.subList(mLastReachedPointIndex, points.size)
 
-            if (remainedPoints.size >= 2) {
+                // if no points remained -> reached destination
+                if (remainedPoints.size <= 1) {
+                    _reachedDestination.postValue(true)
+                } else {
 
-                val startingPoint = remainedPoints[0]
-                // check if start point is new
-                if (mLastStartingPoint?.latitude != startingPoint.latitude && mLastStartingPoint?.longitude != startingPoint.longitude
-                ) {
-                    mLastStartingPoint = startingPoint
+                    val startingPoint = remainedPoints.first()
 
-                    _progressPoints.postValue(ArrayList(remainedPoints))
+                    // check if start point is new
+                    if (mLastStartingPoint?.equalsTo(startingPoint) != true) {
 
-                    startMarkerAnimation(startingPoint, remainedPoints[1])
+                        mLastStartingPoint = startingPoint
+
+                        _progressPoints.postValue(ArrayList(remainedPoints))
+
+                        // start animating marker
+                        startMarkerAnimation(startingPoint, remainedPoints[1])
+
+                    }
+
                 }
+
             }
 
         }
@@ -225,35 +255,51 @@ class NavigationViewModel @Inject constructor(
      * animates marker position from start point to end point
      * */
     private fun startMarkerAnimation(start: LatLng, end: LatLng) {
-
-        if (mMarkerAnimator != null && mMarkerAnimator!!.isRunning) {
-            mMarkerAnimator!!.cancel()
+        if (start.equalsTo(end)) {
+            return
         }
+
+        // cancel marker animation if already running
+        cancelMarkerAnimation()
 
         // animate marker from start point to end point in calculated duration (animationDuration)
         val distance = start.distanceFrom(end).getOrNull(0) ?: 1f
-        val animationDuration = distance * mSpeedCalculator.getAverageSpeedRatio()
-        mMarkerAnimator = ValueAnimator.ofInt(0, 100)
-        mMarkerAnimator!!.duration = animationDuration.toLong()
-        mMarkerAnimator!!.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
-            var lastValue = 0
-            override fun onAnimationUpdate(animation: ValueAnimator) {
-                val percentageValue = (animation.animatedValue as Int)
-                if (percentageValue != lastValue) {
-                    lastValue = percentageValue
-                    val latitude =
-                        start.latitude + ((end.latitude - start.latitude) * percentageValue / 100)
-                    val longitude =
-                        start.longitude + ((end.longitude - start.longitude) * percentageValue / 100)
+        if (distance > 0) {
 
-                    _markerPosition.postValue(LatLng(latitude, longitude))
+            val animationDuration = distance * mSpeedCalculator.getAverageSpeedRatio()
+
+            mMarkerAnimator = ValueAnimator.ofInt(0, 100)
+            mMarkerAnimator!!.duration = animationDuration.toLong()
+            mMarkerAnimator!!.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
+
+                var lastValue = 0
+
+                override fun onAnimationUpdate(animation: ValueAnimator) {
+                    val percentageValue = (animation.animatedValue as Int)
+                    if (percentageValue != lastValue) {
+                        lastValue = percentageValue
+                        val latitude =
+                            start.latitude + ((end.latitude - start.latitude) * percentageValue / 100)
+                        val longitude =
+                            start.longitude + ((end.longitude - start.longitude) * percentageValue / 100)
+
+                        _markerPosition.postValue(LatLng(latitude, longitude))
+                    }
                 }
-            }
 
-        })
+            })
 
-        mMarkerAnimator!!.start()
+            mMarkerAnimator!!.start()
+        } else {
+            _markerPosition.postValue(end)
+        }
 
+    }
+
+    private fun cancelMarkerAnimation() {
+        if (mMarkerAnimator != null && mMarkerAnimator!!.isRunning) {
+            mMarkerAnimator!!.cancel()
+        }
     }
 
     /**
@@ -271,24 +317,27 @@ class NavigationViewModel @Inject constructor(
         }
 
         fun update(latLng: LatLng) {
+            val newTime = System.currentTimeMillis()
 
             if (mLastLocation != null) {
                 // calculate time difference with previous update
-                val newTime = System.currentTimeMillis()
                 val duration = newTime - mLastTime
 
                 // calculate traveled distance from previous update
                 mLastLocation?.distanceFrom(latLng)?.getOrNull(0)?.let { distance ->
-                    val speed = duration / distance
-                    mRecords[mIndex % mRecords.size] = speed
-                    mIndex++
+                    if (distance > 0 && duration > 0) {
+                        val speed = duration / distance
+                        mRecords[mIndex % mRecords.size] = speed
+                        mIndex++
+                    }
                 }
 
-            } else {
-                mLastLocation = latLng
-                mLastTime = System.currentTimeMillis()
             }
+
+            mLastLocation = latLng
+            mLastTime = newTime
 
         }
     }
+
 }

@@ -11,12 +11,12 @@ import javax.inject.Inject;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class MainActivityModel {
+public class MainModel {
 
     private final ApiClient mApiClient;
 
     @Inject
-    public MainActivityModel(ApiClient apiClient) {
+    public MainModel(ApiClient apiClient) {
         this.mApiClient = apiClient;
     }
 

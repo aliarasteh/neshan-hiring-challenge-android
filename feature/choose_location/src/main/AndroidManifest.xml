@@ -4,6 +4,7 @@
 
     <application>
         <activity
+            android:screenOrientation="sensorPortrait"
             android:name=".ChooseLocationActivity"
             android:exported="false" />
     </application>

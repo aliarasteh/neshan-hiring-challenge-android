@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+}
+
+android {
+    compileSdkVersion project.compileSdkVersion.toInteger()
+
+    defaultConfig {
+        minSdkVersion project.minSdkVersion.toInteger()
+        targetSdkVersion project.targetSdkVersion.toInteger()
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        android.dataBinding.enabled true
+    }
+
+    buildTypes {
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation(project(':core:data'))
+    implementation(project(':core:component'))
+
+    // Dependencies for local unit tests
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
+
+    // AndroidX Test - JVM testing
+    androidTestImplementation "androidx.test.ext:junit:$testJunit"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$testEspresso"
+
+    // Hilt dependencies
+    implementation "com.google.dagger:hilt-android:$hiltVersion"
+    kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
+}

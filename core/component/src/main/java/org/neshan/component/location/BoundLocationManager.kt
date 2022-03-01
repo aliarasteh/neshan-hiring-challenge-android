@@ -19,7 +19,7 @@ import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.tasks.Task
 
 class BoundLocationManager(
-    private val mContext: AppCompatActivity ,
+    private val mContext: AppCompatActivity,
     private val mLocationRequest: LocationRequest? = null,
     callback: LocationListener
 ) : DefaultLifecycleObserver {
@@ -83,7 +83,7 @@ class BoundLocationManager(
             mContext.unbindService(mForegroundServiceConnection)
         }
 
-        mForegroundLocationService?.unsubscribeToLocationUpdates()
+//        mForegroundLocationService?.unsubscribeToLocationUpdates()
 
     }
 
@@ -104,7 +104,11 @@ class BoundLocationManager(
 
     }
 
-    fun foregroundPermissionApproved(): Boolean {
+    fun stopLocationUpdates() {
+        mForegroundLocationService?.unsubscribeToLocationUpdates()
+    }
+
+    private fun foregroundPermissionApproved(): Boolean {
 
         return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
             mContext,
@@ -176,9 +180,15 @@ class BoundLocationManager(
 
         override fun onReceive(context: Context, intent: Intent) {
 
-            val location =
-                intent.getParcelableExtra<Location>(ForegroundLocationService.EXTRA_LOCATION)
-            location?.let { locationListener?.onLocationChange(location) }
+            if (intent.hasExtra(ForegroundLocationService.EXTRA_LOCATION)) {
+                val location =
+                    intent.getParcelableExtra<Location>(ForegroundLocationService.EXTRA_LOCATION)
+                location?.let { locationListener?.onLocationChange(location) }
+            } else if (intent.hasExtra(ForegroundLocationService.EXTRA_LAST_LOCATION)) {
+                val location =
+                    intent.getParcelableExtra<Location>(ForegroundLocationService.EXTRA_LAST_LOCATION)
+                location?.let { locationListener?.onLastLocation(location) }
+            }
 
         }
     }

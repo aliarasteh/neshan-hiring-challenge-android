@@ -1,7 +1,6 @@
 package org.neshan.main;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -11,6 +10,8 @@ import androidx.lifecycle.MutableLiveData;
 import org.neshan.R;
 import org.neshan.common.model.LatLng;
 import org.neshan.common.utils.PolylineEncoding;
+import org.neshan.component.util.FunctionExtensionKt;
+import org.neshan.data.Result;
 import org.neshan.data.model.enums.RoutingType;
 import org.neshan.data.model.error.GeneralError;
 import org.neshan.data.model.error.SimpleError;
@@ -21,7 +22,6 @@ import org.neshan.data.model.response.Step;
 import org.neshan.data.util.Event;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,15 +32,15 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 @HiltViewModel
-public class MainActivityViewModel extends AndroidViewModel {
+public class MainViewModel extends AndroidViewModel {
 
-    private final MainActivityModel mModel;
+    private final MainModel mModel;
 
     private final CompositeDisposable mCompositeDisposable;
 
     private final MutableLiveData<Event<GeneralError>> mGeneralError;
 
-    private final MutableLiveData<AddressDetailResponse> mLocationAddressDetail;
+    private final MutableLiveData<Result<AddressDetailResponse>> mLocationAddressDetail;
 
     private final MutableLiveData<RoutingResponse> mRoutingDetail;
 
@@ -50,7 +50,7 @@ public class MainActivityViewModel extends AndroidViewModel {
     private LatLng mEndPoint = null;
 
     @Inject
-    public MainActivityViewModel(@NonNull Application application, MainActivityModel model) {
+    public MainViewModel(@NonNull Application application, MainModel model) {
         super(application);
 
         mModel = model;
@@ -66,7 +66,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         return mGeneralError;
     }
 
-    public LiveData<AddressDetailResponse> getLocationAddressDetailLiveData() {
+    public LiveData<Result<AddressDetailResponse>> getLocationAddressDetailLiveData() {
         return mLocationAddressDetail;
     }
 
@@ -98,6 +98,7 @@ public class MainActivityViewModel extends AndroidViewModel {
      * try to load address detail from server
      */
     public void loadAddressForLocation(LatLng latLng) {
+        mLocationAddressDetail.postValue(Result.Companion.loading());
         mModel.getAddress(latLng.getLatitude(), latLng.getLongitude())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<>() {
@@ -110,15 +111,15 @@ public class MainActivityViewModel extends AndroidViewModel {
                     public void onSuccess(AddressDetailResponse response) {
 
                         if (response.isSuccessFull()) {
-                            mLocationAddressDetail.postValue(response);
+                            mLocationAddressDetail.postValue(Result.Companion.success(response));
                         }
 
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        // TODO: show error to user
-                        e.printStackTrace();
+                        mLocationAddressDetail.postValue(Result.Companion.error(e));
+                        mGeneralError.postValue(new Event<>(FunctionExtensionKt.getError(e)));
                     }
                 });
     }
@@ -172,8 +173,7 @@ public class MainActivityViewModel extends AndroidViewModel {
 
                         @Override
                         public void onError(Throwable e) {
-                            // TODO: show error to user
-                            e.printStackTrace();
+                            mGeneralError.postValue(new Event<>(FunctionExtensionKt.getError(e)));
                         }
                     });
         }
@@ -181,12 +181,13 @@ public class MainActivityViewModel extends AndroidViewModel {
 
     @Override
     protected void onCleared() {
-        super.onCleared();
 
         // disposes any incomplete request to avoid possible error also unnecessary network usage
         if (!mCompositeDisposable.isDisposed()) {
             mCompositeDisposable.dispose();
         }
+
+        super.onCleared();
 
     }
 

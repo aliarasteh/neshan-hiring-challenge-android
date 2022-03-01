@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Neshan Test</string>
     <string name="choose_destination">کجا میخوای بری؟</string>
-    <string name="route">مسیریابی</string>
-    <string name="distance">فاصله تا مقصد</string>
-    <string name="duration">زمان رسیدن</string>
+    <string name="route">بزن بریم</string>
 </resources>

@@ -7,10 +7,12 @@ import static org.neshan.component.location.BoundLocationManager.REQUEST_CODE_FO
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -36,7 +38,9 @@ import org.neshan.choose_location.ChooseLocationActivity;
 import org.neshan.common.model.LatLng;
 import org.neshan.common.model.LatLngBounds;
 import org.neshan.component.location.BoundLocationManager;
+import org.neshan.component.location.LocationListener;
 import org.neshan.component.util.FunctionExtensionKt;
+import org.neshan.data.Result;
 import org.neshan.data.util.EventObserver;
 import org.neshan.databinding.ActivityMainBinding;
 import org.neshan.mapsdk.model.Marker;
@@ -53,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding mBinding;
 
-    private MainActivityViewModel mViewModel;
+    private MainViewModel mViewModel;
 
     // handle location updates
     private BoundLocationManager mLocationManager;
@@ -87,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
 
-        mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         // observe ViewModel live data objects changes
         observeViewModelChange(mViewModel);
 
@@ -131,24 +135,28 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void observeViewModelChange(MainActivityViewModel viewModel) {
+    private void observeViewModelChange(MainViewModel viewModel) {
 
-        viewModel.getLocationAddressDetailLiveData().observe(this, address -> {
-            if (address != null) {
+        viewModel.getLocationAddressDetailLiveData().observe(this, result -> {
+            if (result.getStatus() == Result.Status.SUCCESS && result.getData() != null) {
+
+                mBinding.loading.setVisibility(View.GONE);
+
                 // show location detail bottom sheet
                 LocationDetailBottomSheet bottomSheet = new LocationDetailBottomSheet();
                 bottomSheet.show(getSupportFragmentManager(), "LocationDetail");
-                bottomSheet.setOnDismissListener(dialogInterface -> {
-                    // if user closed address detail then remove location marker from map
-                    if (mDestinationMarker != null) {
-                        mBinding.mapview.removeMarker(mDestinationMarker);
-                        mViewModel.setEndPoint(null);
-                    }
-                    // if user closed address detail then remove drawn path from map
-                    if (mRoutingPathPolyLine != null) {
-                        mBinding.mapview.removePolyline(mRoutingPathPolyLine);
-                    }
-                });
+                bottomSheet.setOnDismissListener(dialogInterface -> clearMapObjects());
+
+            } else if (result.getStatus() == Result.Status.LOADING) {
+
+                mBinding.loading.setVisibility(View.VISIBLE);
+
+            } else if (result.getStatus() == Result.Status.ERROR) {
+
+                mBinding.loading.setVisibility(View.GONE);
+
+                clearMapObjects();
+
             }
         });
 
@@ -178,6 +186,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void clearMapObjects() {
+        // if user closed address detail then remove location marker from map
+        if (mDestinationMarker != null) {
+            mBinding.mapview.removeMarker(mDestinationMarker);
+            mViewModel.setEndPoint(null);
+        }
+        // if user closed address detail then remove drawn path from map
+        if (mRoutingPathPolyLine != null) {
+            mBinding.mapview.removePolyline(mRoutingPathPolyLine);
+        }
+
+        focusOnLocation(mViewModel.getStartPoint());
+    }
+
     private void setUpLocationManager() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(TimeUnit.SECONDS.toMillis(3));
@@ -185,22 +207,35 @@ public class MainActivity extends AppCompatActivity {
         locationRequest.setMaxWaitTime(1);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        mLocationManager = new BoundLocationManager(this, locationRequest, location -> {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            onStartPointSelected(latLng);
+        mLocationManager = new BoundLocationManager(this, locationRequest, new LocationListener() {
+            @Override
+            public void onLastLocation(@NonNull Location location) {
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                onStartPointSelected(latLng, true);
+            }
+
+            @Override
+            public void onLocationChange(@NonNull Location location) {
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                onStartPointSelected(latLng, false);
+            }
         });
 
         mLocationManager.startLocationUpdates();
     }
 
     // does required actions when start location has been changed
-    private void onStartPointSelected(LatLng latLng) {
+    private void onStartPointSelected(LatLng latLng, boolean isCachedLocation) {
 
         // remove previously added marker from map and add new marker to user location
         if (mUserLocationMarker != null) {
             mBinding.mapview.removeMarker(mUserLocationMarker);
         }
-        mUserLocationMarker = createMarker(latLng, R.drawable.ic_marker);
+        if (isCachedLocation) {
+            mUserLocationMarker = createMarker(latLng, R.drawable.ic_marker_off);
+        } else {
+            mUserLocationMarker = createMarker(latLng, R.drawable.ic_marker);
+        }
         mBinding.mapview.addMarker(mUserLocationMarker);
 
         if (mViewModel.getStartPoint() == null) {
@@ -261,9 +296,11 @@ public class MainActivity extends AppCompatActivity {
 
         // setup map camera to show whole path
         LatLngBounds latLngBounds = new LatLngBounds(mViewModel.getStartPoint(), mViewModel.getEndPoint());
+        int mapWidth = Math.min(mBinding.mapview.getWidth(), mBinding.mapview.getHeight());
         ScreenBounds screenBounds = new ScreenBounds(
                 new ScreenPos(0, 0),
-                new ScreenPos(mBinding.mapview.getWidth(), mBinding.mapview.getHeight())
+//                new ScreenPos(mBinding.mapview.getWidth(), mBinding.mapview.getHeight())
+                new ScreenPos(mapWidth, mapWidth)
         );
         mBinding.mapview.moveToCameraBounds(latLngBounds, screenBounds, true, 0.25f);
     }
@@ -275,6 +312,15 @@ public class MainActivity extends AppCompatActivity {
         lineStCr.setWidth(10f);
         lineStCr.setStretchFactor(0f);
         return lineStCr.buildStyle();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        mLocationManager.stopLocationUpdates();
+
+        super.onDestroy();
+
     }
 
 }

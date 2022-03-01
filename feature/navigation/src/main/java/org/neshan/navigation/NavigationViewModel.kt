@@ -16,8 +16,11 @@ import org.neshan.common.model.LatLng
 import org.neshan.common.utils.PolylineEncoding
 import org.neshan.component.util.distanceFrom
 import org.neshan.component.util.equalsTo
+import org.neshan.component.util.getError
 import org.neshan.data.model.enums.RoutingType
+import org.neshan.data.model.error.GeneralError
 import org.neshan.data.model.response.RoutingResponse
+import org.neshan.data.util.Event
 import javax.inject.Inject
 import kotlin.math.sqrt
 
@@ -41,6 +44,9 @@ class NavigationViewModel @Inject constructor(
     private var mStartPoint: LatLng? = null
 
     private var mEndPoint: LatLng? = null
+
+    private val _generalError = MutableLiveData<Event<GeneralError>>()
+    val generalError: LiveData<Event<GeneralError>> by lazy { _generalError }
 
     // remained points for routing
     private val _progressPoints = MutableLiveData<ArrayList<LatLng>>()
@@ -160,8 +166,7 @@ class NavigationViewModel @Inject constructor(
 
                     override fun onError(e: Throwable) {
                         mLoadingDirection = false
-                        // TODO: show error to user
-                        e.printStackTrace()
+                        _generalError.postValue(Event(e.getError()))
                     }
 
                 })

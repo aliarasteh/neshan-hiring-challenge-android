@@ -10,6 +10,8 @@ import androidx.lifecycle.MutableLiveData;
 import org.neshan.R;
 import org.neshan.common.model.LatLng;
 import org.neshan.common.utils.PolylineEncoding;
+import org.neshan.component.util.FunctionExtensionKt;
+import org.neshan.data.Result;
 import org.neshan.data.model.enums.RoutingType;
 import org.neshan.data.model.error.GeneralError;
 import org.neshan.data.model.error.SimpleError;
@@ -38,7 +40,7 @@ public class MainViewModel extends AndroidViewModel {
 
     private final MutableLiveData<Event<GeneralError>> mGeneralError;
 
-    private final MutableLiveData<AddressDetailResponse> mLocationAddressDetail;
+    private final MutableLiveData<Result<AddressDetailResponse>> mLocationAddressDetail;
 
     private final MutableLiveData<RoutingResponse> mRoutingDetail;
 
@@ -64,7 +66,7 @@ public class MainViewModel extends AndroidViewModel {
         return mGeneralError;
     }
 
-    public LiveData<AddressDetailResponse> getLocationAddressDetailLiveData() {
+    public LiveData<Result<AddressDetailResponse>> getLocationAddressDetailLiveData() {
         return mLocationAddressDetail;
     }
 
@@ -96,6 +98,7 @@ public class MainViewModel extends AndroidViewModel {
      * try to load address detail from server
      */
     public void loadAddressForLocation(LatLng latLng) {
+        mLocationAddressDetail.postValue(Result.Companion.loading());
         mModel.getAddress(latLng.getLatitude(), latLng.getLongitude())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<>() {
@@ -108,15 +111,15 @@ public class MainViewModel extends AndroidViewModel {
                     public void onSuccess(AddressDetailResponse response) {
 
                         if (response.isSuccessFull()) {
-                            mLocationAddressDetail.postValue(response);
+                            mLocationAddressDetail.postValue(Result.Companion.success(response));
                         }
 
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        // TODO: show error to user
-                        e.printStackTrace();
+                        mLocationAddressDetail.postValue(Result.Companion.error(e));
+                        mGeneralError.postValue(new Event<>(FunctionExtensionKt.getError(e)));
                     }
                 });
     }
@@ -170,8 +173,7 @@ public class MainViewModel extends AndroidViewModel {
 
                         @Override
                         public void onError(Throwable e) {
-                            // TODO: show error to user
-                            e.printStackTrace();
+                            mGeneralError.postValue(new Event<>(FunctionExtensionKt.getError(e)));
                         }
                     });
         }

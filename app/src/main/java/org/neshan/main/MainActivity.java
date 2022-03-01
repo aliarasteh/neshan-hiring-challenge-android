@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -39,6 +40,7 @@ import org.neshan.common.model.LatLngBounds;
 import org.neshan.component.location.BoundLocationManager;
 import org.neshan.component.location.LocationListener;
 import org.neshan.component.util.FunctionExtensionKt;
+import org.neshan.data.Result;
 import org.neshan.data.util.EventObserver;
 import org.neshan.databinding.ActivityMainBinding;
 import org.neshan.mapsdk.model.Marker;
@@ -135,24 +137,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void observeViewModelChange(MainViewModel viewModel) {
 
-        viewModel.getLocationAddressDetailLiveData().observe(this, address -> {
-            if (address != null) {
+        viewModel.getLocationAddressDetailLiveData().observe(this, result -> {
+            if (result.getStatus() == Result.Status.SUCCESS && result.getData() != null) {
+
+                mBinding.loading.setVisibility(View.GONE);
+
                 // show location detail bottom sheet
                 LocationDetailBottomSheet bottomSheet = new LocationDetailBottomSheet();
                 bottomSheet.show(getSupportFragmentManager(), "LocationDetail");
-                bottomSheet.setOnDismissListener(dialogInterface -> {
-                    // if user closed address detail then remove location marker from map
-                    if (mDestinationMarker != null) {
-                        mBinding.mapview.removeMarker(mDestinationMarker);
-                        mViewModel.setEndPoint(null);
-                    }
-                    // if user closed address detail then remove drawn path from map
-                    if (mRoutingPathPolyLine != null) {
-                        mBinding.mapview.removePolyline(mRoutingPathPolyLine);
-                    }
+                bottomSheet.setOnDismissListener(dialogInterface -> clearMapObjects());
 
-                    focusOnLocation(mViewModel.getStartPoint());
-                });
+            } else if (result.getStatus() == Result.Status.LOADING) {
+
+                mBinding.loading.setVisibility(View.VISIBLE);
+
+            } else if (result.getStatus() == Result.Status.ERROR) {
+
+                mBinding.loading.setVisibility(View.GONE);
+
+                clearMapObjects();
+
             }
         });
 
@@ -182,6 +186,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void clearMapObjects() {
+        // if user closed address detail then remove location marker from map
+        if (mDestinationMarker != null) {
+            mBinding.mapview.removeMarker(mDestinationMarker);
+            mViewModel.setEndPoint(null);
+        }
+        // if user closed address detail then remove drawn path from map
+        if (mRoutingPathPolyLine != null) {
+            mBinding.mapview.removePolyline(mRoutingPathPolyLine);
+        }
+
+        focusOnLocation(mViewModel.getStartPoint());
+    }
+
     private void setUpLocationManager() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(TimeUnit.SECONDS.toMillis(3));
@@ -207,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // does required actions when start location has been changed
-    private void onStartPointSelected(LatLng latLng , boolean isCachedLocation) {
+    private void onStartPointSelected(LatLng latLng, boolean isCachedLocation) {
 
         // remove previously added marker from map and add new marker to user location
         if (mUserLocationMarker != null) {

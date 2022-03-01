@@ -16,13 +16,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object CoreModule {
 
-    @Provides
-    @Singleton
-    fun provideGson(): Gson {
-
-        return Gson()
-
-    }
+    // some singleton classes like database helpers, api service helper classes, preferences helper classes
+    // will be provided here
 
     @Provides
     @Singleton

@@ -29,7 +29,9 @@ import org.neshan.component.util.angleWithNorthAxis
 import org.neshan.component.util.showError
 import org.neshan.component.util.toBitmap
 import org.neshan.component.view.snackbar.SnackBar
+import org.neshan.data.model.error.GeneralError
 import org.neshan.data.model.error.SimpleError
+import org.neshan.data.util.EventObserver
 import org.neshan.mapsdk.model.Marker
 import org.neshan.mapsdk.model.Polyline
 import org.neshan.navigation.databinding.ActivityNavigationBinding
@@ -187,6 +189,9 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
             }
         }
 
+        viewModel.generalError.observe(this, EventObserver { error: GeneralError ->
+            showError(mBinding.root, error)
+        })
     }
 
     /**
@@ -277,8 +282,10 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
     private fun focusOnLocation(loc: LatLng) {
 
-        mBinding.mapview.moveCamera(loc, 0.25f)
-        mBinding.mapview.setZoom(17f, 0.25f)
+        mBinding.mapview.moveCamera(loc, 0.5f)
+        if (mBinding.mapview.zoom != 17f) {
+            mBinding.mapview.setZoom(17f, 0.25f)
+        }
 
     }
 

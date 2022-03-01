@@ -10,9 +10,11 @@ import org.neshan.common.model.LatLng
 import org.neshan.component.R
 import org.neshan.component.view.snackbar.SnackBar
 import org.neshan.component.view.snackbar.SnackBarType
-import org.neshan.data.model.error.GeneralError
-import org.neshan.data.model.error.NetworkError
-import org.neshan.data.model.error.SimpleError
+import org.neshan.data.model.error.*
+import retrofit2.HttpException
+import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import kotlin.math.atan2
 
 fun Drawable.toBitmap(): Bitmap {
@@ -35,12 +37,39 @@ fun Drawable.toBitmap(): Bitmap {
 }
 
 /**
+ * get error detail from Throwable object
+ * */
+fun Throwable.getError(): GeneralError {
+
+    this.printStackTrace()
+
+    return when (this) {
+        is UnknownHostException, is SocketException -> {
+            NetworkError.instance()
+        }
+        is SocketTimeoutException -> {
+            TimeoutError.instance()
+        }
+        is HttpException -> {
+            // TODO: improve parsing server errors
+            return ServerError(this.response()?.code() ?: 0)
+        }
+        else -> {
+            UnknownError.instance()
+        }
+    }
+}
+
+/**
  * show error as snack bar
  * */
 fun showError(rootView: View, error: GeneralError) {
     when (error) {
         is NetworkError -> {
             SnackBar.make(rootView, R.string.network_connection_error, SnackBarType.ERROR).show()
+        }
+        is ServerError -> {
+            SnackBar.make(rootView, R.string.unknown_server_error, SnackBarType.ERROR).show()
         }
         is SimpleError -> {
             SnackBar.make(rootView, error.errorMessage, SnackBarType.ERROR).show()

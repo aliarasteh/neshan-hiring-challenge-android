@@ -284,7 +284,7 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
         mBinding.mapview.moveCamera(loc, 0.5f)
         if (mBinding.mapview.zoom != 17f) {
-            mBinding.mapview.setZoom(17f, 0.25f)
+            mBinding.mapview.setZoom(17f, 0.5f)
         }
 
     }

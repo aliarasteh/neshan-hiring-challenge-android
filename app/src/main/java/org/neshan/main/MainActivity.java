@@ -40,7 +40,7 @@ import org.neshan.common.model.LatLngBounds;
 import org.neshan.component.location.BoundLocationManager;
 import org.neshan.component.location.LocationListener;
 import org.neshan.component.util.FunctionExtensionKt;
-import org.neshan.data.Result;
+import org.neshan.data.network.Result;
 import org.neshan.data.util.EventObserver;
 import org.neshan.databinding.ActivityMainBinding;
 import org.neshan.mapsdk.model.Marker;
@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationListener {
     private static final String TAG = "MainActivity";
 
     private ActivityMainBinding mBinding;
@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     // poly line for the path from start point to end point on map
     private Polyline mRoutingPathPolyLine;
 
+    // observing choose location results
     private final ActivityResultLauncher<Intent> mStartChooseLocationForResult = this.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
 
         // check if location selected
@@ -135,11 +136,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onLastLocation(@NonNull Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        onStartPointSelected(latLng, true);
+    }
+
+    @Override
+    public void onLocationChange(@NonNull Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        onStartPointSelected(latLng, false);
+    }
+
     private void observeViewModelChange(MainViewModel viewModel) {
 
         viewModel.getLocationAddressDetailLiveData().observe(this, result -> {
             if (result.getStatus() == Result.Status.SUCCESS && result.getData() != null) {
 
+                // hide path loading view
                 mBinding.loading.setVisibility(View.GONE);
 
                 // show location detail bottom sheet
@@ -149,10 +163,12 @@ public class MainActivity extends AppCompatActivity {
 
             } else if (result.getStatus() == Result.Status.LOADING) {
 
+                // show path loading view
                 mBinding.loading.setVisibility(View.VISIBLE);
 
             } else if (result.getStatus() == Result.Status.ERROR) {
 
+                // hide path loading view
                 mBinding.loading.setVisibility(View.GONE);
 
                 clearMapObjects();
@@ -163,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getRoutePoints().observe(this, this::showPathOnMap);
 
         viewModel.getGeneralErrorLiveData().observe(this, new EventObserver<>(error -> {
+            // show snack bar for errors
             FunctionExtensionKt.showError(mBinding.getRoot(), error);
             return null;
         }));
@@ -186,6 +203,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * remove destination marker and drawn path for direction
+     */
     private void clearMapObjects() {
         // if user closed address detail then remove location marker from map
         if (mDestinationMarker != null) {
@@ -200,6 +220,10 @@ public class MainActivity extends AppCompatActivity {
         focusOnLocation(mViewModel.getStartPoint());
     }
 
+    /**
+     * set up and start location service to handle location changes,
+     * receive location updates
+     */
     private void setUpLocationManager() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(TimeUnit.SECONDS.toMillis(3));
@@ -207,24 +231,14 @@ public class MainActivity extends AppCompatActivity {
         locationRequest.setMaxWaitTime(1);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        mLocationManager = new BoundLocationManager(this, locationRequest, new LocationListener() {
-            @Override
-            public void onLastLocation(@NonNull Location location) {
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                onStartPointSelected(latLng, true);
-            }
-
-            @Override
-            public void onLocationChange(@NonNull Location location) {
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                onStartPointSelected(latLng, false);
-            }
-        });
+        mLocationManager = new BoundLocationManager(this, locationRequest, this);
 
         mLocationManager.startLocationUpdates();
     }
 
-    // does required actions when start location has been changed
+    /**
+     * does required actions when start location has been changed
+     */
     private void onStartPointSelected(LatLng latLng, boolean isCachedLocation) {
 
         // remove previously added marker from map and add new marker to user location
@@ -246,7 +260,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // does required actions when destination location has been chosen
+    /**
+     * does required actions when destination location has been chosen
+     */
     private void onDestinationSelected(LatLng latLng) {
 
         // remove previously added marker from map and add new marker to selected location
@@ -281,11 +297,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void focusOnLocation(LatLng latLng) {
 
-        mBinding.mapview.moveCamera(latLng, 0.25f);
-        mBinding.mapview.setZoom(15f, 0.25f);
+        if (latLng != null) {
+            mBinding.mapview.moveCamera(latLng, 0.25f);
+            mBinding.mapview.setZoom(15f, 0.25f);
+        }
 
     }
 
+    /**
+     * creates path from calculated points for direction path and shows as poly line on map
+     */
     private void showPathOnMap(ArrayList<LatLng> routePoints) {
 
         if (mRoutingPathPolyLine != null) {
@@ -302,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
 //                new ScreenPos(mBinding.mapview.getWidth(), mBinding.mapview.getHeight())
                 new ScreenPos(mapWidth, mapWidth)
         );
-        mBinding.mapview.moveToCameraBounds(latLngBounds, screenBounds, true, 0.25f);
+        mBinding.mapview.moveToCameraBounds(latLngBounds, screenBounds, true, 0.5f);
     }
 
     private LineStyle getLineStyle() {
@@ -317,6 +338,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
 
+        // cancel location updates and stop service
         mLocationManager.stopLocationUpdates();
 
         super.onDestroy();

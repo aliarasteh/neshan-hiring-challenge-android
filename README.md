@@ -7,11 +7,11 @@ You can download and test the application from **files** directory or just click
 
 [**click to download apk file**](https://raw.githubusercontent.com/aliarasteh/neshan-hiring-challenge-android/main/files/neshan-hiring-challenge.apk)
 
-
-
 <br>
 <p align="center">
- <img src="files/screenshot.png" width="250"/></p>
+    <img src="files/screenshot1.png" width="250"/>
+    <img src="files/screenshot2.png" width="250"/>
+</p>
 
 <br>
 
@@ -40,6 +40,7 @@ here are modules defined in the app structure, you can see more detail about eac
   - [data](core/data)
 - feature
   - [choose location](feature/choose_location)
+  - [navigation](feature/navigation)
   - other features
 
 
@@ -71,7 +72,7 @@ git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 
    - get your **API KEY** key from [**Neshan**](https://developers.neshan.org/panel/access-token/index)
 
-   - place your key in `gradle.properties` file (recommended: use global `gradle.properties`)
+   - place your key in `local.properties` file (recommended: use global `local.properties`)
 
 ```
 NESHAN_API_KEY="your api key for neshan services"
@@ -85,11 +86,11 @@ NESHAN_API_KEY="your api key for neshan services"
 
 - [x] implement base app structure and define architecture
 - [x] create common tools and helper classes
-- [ ] implement Neshan map navigation sample
+- [x] implement Neshan map navigation sample
   - [x] main map activity
   - [x] choose location activity
-  - [ ] find and show direction on map
-  - [ ] navigate to destination
+  - [x] find and show direction on map
+  - [x] navigate to destination
   - [ ] write test cases (not completed)
 - [x] documentation
 

@@ -3,7 +3,6 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
-    id 'com.google.protobuf' version '0.8.12'
 }
 
 android {
@@ -13,7 +12,7 @@ android {
         minSdkVersion project.minSdkVersion.toInteger()
         targetSdkVersion project.targetSdkVersion.toInteger()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "NESHAN_API_KEY", project.NESHAN_API_KEY)
+        buildConfigField("String", "NESHAN_API_KEY", getNeshanApiKey())
     }
 
     buildTypes {
@@ -36,7 +35,6 @@ dependencies {
     testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVersion")
     testImplementation "androidx.arch.core:core-testing:$archTestingVersion"
 //    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
-    testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
 
     androidTestImplementation "androidx.test.ext:junit:$testJunit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$testEspresso"
@@ -56,4 +54,11 @@ dependencies {
     implementation "io.reactivex.rxjava3:rxjava:$rxJavaVersion"
     // RxJava3 Adapter for retrofit
     implementation "com.github.akarnokd:rxjava3-retrofit-adapter:$retrofitAdapterVersion"
+}
+
+String getNeshanApiKey() {
+    def propFile = rootProject.file("./local.properties")
+    def properties = new Properties()
+    properties.load(new FileInputStream(propFile))
+    return properties['NESHAN_API_KEY']
 }

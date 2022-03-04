@@ -99,7 +99,6 @@ fun LatLng.distanceFrom(latLng: LatLng): FloatArray {
 
 }
 
-
 /**
  * checks points are the same
  * */

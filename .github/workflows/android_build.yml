@@ -2,9 +2,9 @@ name: Android Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
 
       - name: Set Up JDK
         uses: actions/setup-java@v1
@@ -21,6 +21,11 @@ jobs:
 
       - name: Change Wrapper Permissions
         run: chmod +x ./gradlew
+
+      - name: Write values to local.properties file
+        env:
+          NESHAN_API_KEY: ${{ secrets.NESHAN_API_KEY }}
+        run: echo NESHAN_API_KEY=\"NESHAN_API_KEY\" > ./local.properties
 
       - name: Run Tests
         run: ./gradlew testReleaseUnitTest

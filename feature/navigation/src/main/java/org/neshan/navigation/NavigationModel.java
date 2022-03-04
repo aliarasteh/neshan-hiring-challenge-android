@@ -2,7 +2,6 @@ package org.neshan.navigation;
 
 import org.neshan.common.model.LatLng;
 import org.neshan.data.model.enums.RoutingType;
-import org.neshan.data.model.response.AddressDetailResponse;
 import org.neshan.data.model.response.RoutingResponse;
 import org.neshan.data.network.ApiClient;
 

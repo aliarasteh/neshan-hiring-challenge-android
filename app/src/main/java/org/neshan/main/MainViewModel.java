@@ -11,7 +11,7 @@ import org.neshan.R;
 import org.neshan.common.model.LatLng;
 import org.neshan.common.utils.PolylineEncoding;
 import org.neshan.component.util.FunctionExtensionKt;
-import org.neshan.data.Result;
+import org.neshan.data.network.Result;
 import org.neshan.data.model.enums.RoutingType;
 import org.neshan.data.model.error.GeneralError;
 import org.neshan.data.model.error.SimpleError;
@@ -38,15 +38,21 @@ public class MainViewModel extends AndroidViewModel {
 
     private final CompositeDisposable mCompositeDisposable;
 
+    // used for posting possible errors to view
     private final MutableLiveData<Event<GeneralError>> mGeneralError;
 
+    // address detail for selected location
     private final MutableLiveData<Result<AddressDetailResponse>> mLocationAddressDetail;
 
+    // calculated path for selected start and end points
     private final MutableLiveData<RoutingResponse> mRoutingDetail;
 
+    // points for showing direction path on map
     private final MutableLiveData<ArrayList<LatLng>> mRoutePoints;
 
+    // navigation start point
     private LatLng mStartPoint = null;
+    // navigation end point
     private LatLng mEndPoint = null;
 
     @Inject

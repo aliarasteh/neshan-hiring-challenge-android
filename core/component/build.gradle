@@ -37,6 +37,7 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$testJunit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$testEspresso"
+    testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
 
     api "androidx.core:core-ktx:$coreVersion"
     api "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"

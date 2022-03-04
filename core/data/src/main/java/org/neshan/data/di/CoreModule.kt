@@ -1,6 +1,5 @@
 package org.neshan.data.di
 
-import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

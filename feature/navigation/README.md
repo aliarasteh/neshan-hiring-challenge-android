@@ -4,6 +4,6 @@ This module is implemented for handling navigation.
 
 ### Features
 
-- [ ] show path on map
-- [ ] update user progress on path
+- [x] show path on map
+- [x] update user progress on path
 

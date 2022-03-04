@@ -32,6 +32,7 @@ class NavigationViewModel @Inject constructor(
 
     companion object {
         private const val MAX_DISTANCE_TOLERANCE_IN_METERS = 50
+        private const val MAX_BACKWARD_MOVEMENT_TOLERANCE_IN_METERS = 2
         private const val DEFAULT_AVERAGE_SPEED_FOR_CAR = 200f
     }
 
@@ -190,7 +191,7 @@ class NavigationViewModel @Inject constructor(
             // check if user moved backward
             val isUserMovedBackward = nextToUserDistance > currentToNextDistance
                     && nextToUserDistance > currentToUserDistance
-                    && nextToUserDistance - currentToNextDistance > 1
+                    && nextToUserDistance - currentToNextDistance > MAX_BACKWARD_MOVEMENT_TOLERANCE_IN_METERS
 
             // check if user has gone far from route
             var isUserFarFromRoute = false

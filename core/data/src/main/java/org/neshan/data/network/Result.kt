@@ -1,4 +1,4 @@
-package org.neshan.data
+package org.neshan.data.network
 
 /**
  * A generic class that holds a value with its loading status.

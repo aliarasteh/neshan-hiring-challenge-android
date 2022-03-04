@@ -5,7 +5,7 @@ Application loads map on startup then starts to find user location and shows the
 
 You can download and test the application from **files** directory or just click on the link below.
 
-[**click to download apk file**](https://raw.githubusercontent.com/aliarasteh/neshan-hiring-challenge-android/main/files/neshan-hiring-challenge.apk)
+[**click to download apk file**](https://raw.githubusercontent.com/aliarasteh/neshan-hiring-challenge-android/master/files/neshan-hiring-challenge.apk)
 
 <br>
 <p align="center">

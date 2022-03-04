@@ -30,7 +30,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             debuggable false
         }
@@ -50,14 +50,14 @@ android {
     buildFeatures {
         viewBinding true
     }
-//    splits {
-//        abi {
-//            enable true
-//            reset()
-//            include 'armeabi-v7a'
-//            universalApk false
-//        }
-//    }
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a'
+            universalApk false
+        }
+    }
 }
 
 dependencies {
@@ -88,6 +88,4 @@ dependencies {
     kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
     kapt "androidx.hilt:hilt-compiler:$hiltCompilerVersion"
 
-    // Neshan location
-    implementation "com.github.NeshanMaps:Location:$neshnLocationVersion"
 }

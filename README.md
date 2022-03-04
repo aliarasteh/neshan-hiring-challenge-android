@@ -7,11 +7,11 @@ You can download and test the application from **files** directory or just click
 
 [**click to download apk file**](https://raw.githubusercontent.com/aliarasteh/neshan-hiring-challenge-android/main/files/neshan-hiring-challenge.apk)
 
-
-
 <br>
 <p align="center">
- <img src="files/screenshot.png" width="250"/></p>
+    <img src="files/screenshot1.png" width="250"/>
+    <img src="files/screenshot2.png" width="250"/>
+</p>
 
 <br>
 
@@ -40,6 +40,7 @@ here are modules defined in the app structure, you can see more detail about eac
   - [data](core/data)
 - feature
   - [choose location](feature/choose_location)
+  - [navigation](feature/navigation)
   - other features
 
 
@@ -56,14 +57,28 @@ here are modules defined in the app structure, you can see more detail about eac
 
 ### <a name="setup">Setup And Run</a> 
 
-1. Clone the project from:  
+1. Clone the project:  
 
 ```sh
 git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 ```
 
-2. Get your license key from [**Neshan**](https://developers.neshan.org/panel/access-token/index) and place it in project
-3. Build and run project
+2. Define licence key and 
+
+   - get your **License key** from [**Neshan**](https://developers.neshan.org/panel/access-token/index) 
+   - place it in `neshan.license` file founded in directory:`src/main/res/raw/neshan.license`
+
+3. Define neshan Api key
+
+   - get your **API KEY** key from [**Neshan**](https://developers.neshan.org/panel/access-token/index)
+
+   - place your key in `local.properties` file (recommended: use global `local.properties`)
+
+```
+NESHAN_API_KEY="your api key for neshan services"
+```
+
+4. Build and run project
 
 
 
@@ -71,11 +86,11 @@ git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 
 - [x] implement base app structure and define architecture
 - [x] create common tools and helper classes
-- [ ] implement Neshan map navigation sample
-  - [ ] main map activity
-  - [ ] choose location activity
-  - [ ] find and show direction on map
-  - [ ] navigate to destination
+- [x] implement Neshan map navigation sample
+  - [x] main map activity
+  - [x] choose location activity
+  - [x] find and show direction on map
+  - [x] navigate to destination
   - [ ] write test cases (not completed)
 - [x] documentation
 
@@ -85,8 +100,9 @@ git clone https://github.com/aliarasteh/neshan-hiring-challenge-android.git
 
 here are third part libraries used in this sample
 
-1. **Balloon** - useful tool for showing tooltips and popups [GitHub](https://github.com/skydoves/Balloon)
-3. **Retrofit** - A type-safe HTTP client for Android and Java and great tool for networking [GitHub](https://github.com/square/retrofit)
+1. **Neshan** - Neshan map and navigation tools - [WebSite](https://platform.neshan.org/)
+2. **Retrofit** - A type-safe HTTP client for Android and Java and great tool for networking - [GitHub](https://github.com/square/retrofit)
+3. **RxJava** - Enables reactive programming in Android. used for handling network requests in Java - [GitHub](https://github.com/ReactiveX/RxJava)
 
 
 

@@ -9,35 +9,30 @@ buildscript {
         junitVersion = '4.13.2'
         testJunit = '1.1.3'
         archTestingVersion = '2.1.0'
-        coroutinesVersion = '1.5.2'
         testRunnerVersion = '1.4.0'
         testEspresso = '3.4.0'
         hamcrestVersion = '1.3'
         mockitoVersion = '2.8.9'
 
         multidexVersion = '1.0.3'
-        coroutineVersion = '1.4.3'
         coreVersion = '1.7.0'
         lifecycleVersion = '2.4.0'
         supportVersion = '1.4.1'
-        dataBindingSupport = '3.2.0-alpha10'
         materialVersion = '1.5.0'
-        navigationVersion = '2.4.0'
-        roomVersion = '2.3.0'
-        pagingVersion = '3.0.1'
         constraintlayoutVersion = '2.1.3'
-        swipeRefreshVersion = '1.1.0'
-        recyclerViewVersion = '1.2.1'
-//        fragmentVersion = '1.4.1'
+        playServiceGcmVersion = '17.0.0'
+        playServiceLocationVersion = '19.0.1'
 
         hiltVersion = '2.40.5'
         hiltCompilerVersion = '1.0.0'
 
         okhttpVersion ='4.9.1'
         retrofitVersion ='2.9.0'
-        coilVersion = '1.4.0'
-        skydovesBalloon = '1.4.1'
+        retrofitAdapterVersion ='3.0.0'
+        rxJavaVersion = '3.1.3'
+        rxAndroidVersion = '3.0.0'
         neshanMapVersion = '1.0.0'
+        neshnLocationVersion = '1.0.0'
     }
     repositories {
         mavenCentral()
@@ -47,7 +42,6 @@ buildscript {
         classpath "com.android.tools.build:gradle:$gradleVersion"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hiltVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
     }
 }
 
@@ -55,7 +49,9 @@ allprojects {
     repositories {
         mavenCentral()
         google()
+        maven { url 'https://jitpack.io' }
         maven { url "https://maven.neshan.org/artifactory/public-maven" }
+        maven { url "https://oss.jfrog.org/libs-snapshot" }
     }
 }
 

@@ -1,0 +1,5 @@
+<resources>
+    <string name="start_point_not_selected">مبدا به درستی انتخاب نشده، دسترسی مکان یاب را بررسی کنید</string>
+    <string name="end_point_not_selected">مقصد به درستی انتخاب نشده</string>
+    <string name="routing_failure">خطا در مسیر یابی</string>
+</resources>

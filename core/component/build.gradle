@@ -14,7 +14,6 @@ android {
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        android.dataBinding.enabled true
     }
 
     buildTypes {
@@ -24,14 +23,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = '11'
-    }
-    buildFeatures {
-        viewBinding true
     }
 }
 
@@ -41,6 +37,7 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$testJunit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$testEspresso"
+    testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
 
     api "androidx.core:core-ktx:$coreVersion"
     api "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
@@ -49,26 +46,16 @@ dependencies {
 
     // Kotlin
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
+//    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
+//    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
 
     // Lifecycle components
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
 
-    //dataBinding
-//    kapt "com.android.databinding:compiler:$dataBindingSupport"
-
-    // navigation component
-//    api "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-//    api "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
-
     // Hilt dependencies
     api "com.google.dagger:hilt-android:$hiltVersion"
     kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
-
-    // tooltip (https://github.com/skydoves/Balloon)
-    implementation "com.github.skydoves:balloon:$skydovesBalloon"
 
     //Neshan sdk library
     api "neshan-android-sdk:mobile-sdk:$neshanMapVersion"
@@ -76,6 +63,6 @@ dependencies {
     api "neshan-android-sdk:common-sdk:0.0.1"
 
     //Play Services
-    api 'com.google.android.gms:play-services-gcm:16.1.0'
-    api 'com.google.android.gms:play-services-location:17.0.0'
+    api "com.google.android.gms:play-services-gcm:$playServiceGcmVersion"
+    api "com.google.android.gms:play-services-location:$playServiceLocationVersion"
 }

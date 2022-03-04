@@ -1,6 +1,5 @@
 package org.neshan.data.di
 
-import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,17 +15,16 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object CoreModule {
 
-    @Provides
-    @Singleton
-    fun provideGson(): Gson {
-        return Gson()
-    }
+    // some singleton classes like database helpers, api service helper classes, preferences helper classes
+    // will be provided here
 
     @Provides
     @Singleton
     fun provideApiClient(retrofitConfig: RetrofitConfig): ApiClient {
         retrofitConfig.initialize()
+
         return retrofitConfig.createService(ApiClient::class.java)
+
     }
 
 }

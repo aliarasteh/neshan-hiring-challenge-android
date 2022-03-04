@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Neshan Test</string>
+    <string name="choose_destination">کجا میخوای بری؟</string>
+    <string name="route">بزن بریم</string>
 </resources>

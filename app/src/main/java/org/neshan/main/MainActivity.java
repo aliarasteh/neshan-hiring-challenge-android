@@ -231,8 +231,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         locationRequest.setMaxWaitTime(1);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        mLocationManager = new BoundLocationManager(this, locationRequest, this);
-
+        mLocationManager = new BoundLocationManager(this, locationRequest);
+        mLocationManager.setLocationListener(this);
         mLocationManager.startLocationUpdates();
     }
 

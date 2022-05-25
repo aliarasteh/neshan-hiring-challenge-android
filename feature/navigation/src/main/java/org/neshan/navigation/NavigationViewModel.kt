@@ -19,6 +19,7 @@ import org.neshan.component.util.equalsTo
 import org.neshan.component.util.getError
 import org.neshan.data.model.enums.RoutingType
 import org.neshan.data.model.error.GeneralError
+import org.neshan.data.model.response.Leg
 import org.neshan.data.model.response.RoutingResponse
 import org.neshan.data.util.Event
 import javax.inject.Inject
@@ -48,6 +49,9 @@ class NavigationViewModel @Inject constructor(
 
     private val _generalError = MutableLiveData<Event<GeneralError>>()
     val generalError: LiveData<Event<GeneralError>> by lazy { _generalError }
+
+    private val _routingDetail = MutableLiveData<Leg>()
+    val routingDetail: LiveData<Leg> by lazy { _routingDetail }
 
     // remained points for routing
     private val _progressPoints = MutableLiveData<ArrayList<LatLng>>()
@@ -143,15 +147,15 @@ class NavigationViewModel @Inject constructor(
                             try {
                                 response.routes?.firstOrNull()?.legs?.firstOrNull()?.let { leg ->
 
+                                    _routingDetail.postValue(leg)
+
                                     leg.steps.map { step ->
                                         mRoutingPoints!!.addAll(PolylineEncoding.decode(step.encodedPolyline))
+                                    }
 
-                                        if (mRoutingPoints!!.size >= 2) {
-                                            _progressPoints.postValue(mRoutingPoints!!)
-
-                                            _markerPosition.postValue(mRoutingPoints!!.first())
-                                        }
-
+                                    if (mRoutingPoints!!.size >= 2) {
+                                        _progressPoints.postValue(mRoutingPoints!!)
+                                        _markerPosition.postValue(mRoutingPoints!!.first())
                                     }
 
                                     distance.set(leg.distance.text)

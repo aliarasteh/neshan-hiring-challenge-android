@@ -20,9 +20,8 @@ import com.google.android.gms.tasks.Task
 
 class BoundLocationManager(
     private val mContext: AppCompatActivity,
-    private val mLocationRequest: LocationRequest? = null,
-    callback: LocationListener
-) : DefaultLifecycleObserver {
+    private val mLocationRequest: LocationRequest? = null
+) : LocationManager, DefaultLifecycleObserver {
 
     companion object {
         private const val TAG = "BoundLocationManager"
@@ -30,6 +29,8 @@ class BoundLocationManager(
         const val REQUEST_CODE_LOCATION_SETTING = 1001
         const val REQUEST_CODE_FOREGROUND_PERMISSIONS = 1002
     }
+
+    private var mLocationListener: LocationListener? = null
 
     private var mForegroundLocationServiceBound = false
 
@@ -39,7 +40,7 @@ class BoundLocationManager(
     // Listens for location broadcasts from ForegroundLocationService.
     private val mForegroundBroadcastReceiver: ForegroundBroadcastReceiver by lazy {
         ForegroundBroadcastReceiver().apply {
-            this.locationListener = callback
+            this.locationListener = mLocationListener
         }
     }
 
@@ -87,7 +88,15 @@ class BoundLocationManager(
 
     }
 
-    fun startLocationUpdates() {
+    override fun setLocationListener(listener: LocationListener) {
+        if (mLocationListener == null) {
+            mForegroundBroadcastReceiver.locationListener = listener
+        }
+
+        mLocationListener = listener
+    }
+
+    override fun startLocationUpdates() {
 
         if (foregroundPermissionApproved()) {
             mForegroundLocationService?.subscribeToLocationUpdates()
@@ -104,7 +113,7 @@ class BoundLocationManager(
 
     }
 
-    fun stopLocationUpdates() {
+    override fun stopLocationUpdates() {
         mForegroundLocationService?.unsubscribeToLocationUpdates()
     }
 

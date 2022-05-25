@@ -146,7 +146,8 @@ class ChooseLocationActivity : AppCompatActivity(), LocationListener {
             maxWaitTime = 1
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
-        mLocationManager = BoundLocationManager(this, locationRequest, this)
+        mLocationManager = BoundLocationManager(this, locationRequest)
+        mLocationManager?.setLocationListener(this)
         mLocationManager?.startLocationUpdates()
     }
 

@@ -33,6 +33,8 @@ data class Step(
     val instruction: String,
     val distance: Distance,
     val duration: Duration,
+    @SerializedName("start_location")
+    val startLocation: DoubleArray,
     @SerializedName("bearing_after")
     val bearingAfter: Int,
     @SerializedName("polyline")

@@ -24,7 +24,9 @@ import kotlinx.coroutines.launch
 import org.neshan.common.model.LatLng
 import org.neshan.component.location.BoundLocationManager
 import org.neshan.component.location.BoundLocationManager.Companion.REQUEST_CODE_FOREGROUND_PERMISSIONS
+import org.neshan.component.location.FakeLocationManager
 import org.neshan.component.location.LocationListener
+import org.neshan.component.location.LocationManager
 import org.neshan.component.util.angleWithNorthAxis
 import org.neshan.component.util.showError
 import org.neshan.component.util.toBitmap
@@ -42,6 +44,7 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
     companion object {
         private const val TAG = "NavigationActivity"
+        private const val USE_FAKE_LOCATIONS = true
         private const val LOCATION_UPDATE_INTERVAL = 3000L // 3 seconds
         private const val LOCATION_UPDATE_FASTEST_INTERVAL = 1000L // 1 second
 
@@ -54,7 +57,7 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
     private lateinit var mViewModel: NavigationViewModel
 
     // handle location updates
-    private var mLocationManager: BoundLocationManager? = null
+    private var mLocationManager: LocationManager? = null
 
     // a marker for user location to be shown on map
     private var mUserLocationMarker: Marker? = null
@@ -171,6 +174,14 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
     private fun observeViewModelChange(viewModel: NavigationViewModel) {
 
+        if (USE_FAKE_LOCATIONS) {
+            viewModel.routingDetail.observe(this) { routingDetail ->
+                mLocationManager = FakeLocationManager(routingDetail)
+                mLocationManager?.setLocationListener(this)
+                mLocationManager?.startLocationUpdates()
+            }
+        }
+
         viewModel.progressPoints.observe(this) { progressPoints ->
             updatePathOnMap(progressPoints)
         }
@@ -247,8 +258,11 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
 
-        mLocationManager = BoundLocationManager(this, locationRequest, this)
-        mLocationManager?.startLocationUpdates()
+        if (!USE_FAKE_LOCATIONS) {
+            mLocationManager = BoundLocationManager(this, locationRequest)
+            mLocationManager?.setLocationListener(this)
+            mLocationManager?.startLocationUpdates()
+        }
 
     }
 
@@ -264,13 +278,13 @@ class NavigationActivity : AppCompatActivity(), LocationListener {
 
     }
 
-    private fun createMarker(latLng: LatLng): Marker {
+    private fun createMarker(latLng: LatLng, marker: Int = R.drawable.ic_marker): Marker {
 
         val markStCr = MarkerStyleBuilder()
 
         markStCr.size = 30f
 
-        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_marker)
+        val drawable = ContextCompat.getDrawable(this, marker)
         if (drawable != null) {
             val markerBitmap = BitmapUtils.createBitmapFromAndroidBitmap(drawable.toBitmap())
             markStCr.bitmap = markerBitmap

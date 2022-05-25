@@ -43,6 +43,7 @@ import org.neshan.component.util.FunctionExtensionKt;
 import org.neshan.data.network.Result;
 import org.neshan.data.util.EventObserver;
 import org.neshan.databinding.ActivityMainBinding;
+import org.neshan.mapsdk.MapView;
 import org.neshan.mapsdk.model.Marker;
 import org.neshan.mapsdk.model.Polyline;
 
@@ -187,6 +188,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void setViewListeners() {
+
+        mBinding.mapview.setOnMapLongClickListener(this::onDestinationSelected);
 
         mBinding.location.setOnClickListener(view -> {
             if (mViewModel.getStartPoint() != null) {
